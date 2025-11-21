@@ -173,7 +173,19 @@ function calculateDistanceToFeature(point: Point, feature: any): number {
     if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
       // Get the boundary (perimeter) of the polygon
       const boundary = turf.polygonToLine(geom);
-      const distance = turf.pointToLineDistance(pt, boundary, { units: 'kilometers' });
+      // polygonToLine can return Feature<LineString | MultiLineString>
+      // pointToLineDistance needs LineString, so we handle MultiLineString by converting to LineString
+      let lineString: turf.Feature<turf.LineString> | turf.LineString;
+      if (boundary.type === 'Feature' && boundary.geometry.type === 'MultiLineString') {
+        // Convert MultiLineString to LineString by taking the first line
+        lineString = turf.lineString(boundary.geometry.coordinates[0]);
+      } else if (boundary.type === 'Feature' && boundary.geometry.type === 'LineString') {
+        lineString = boundary;
+      } else {
+        // Fallback: use boundary as-is with type assertion
+        lineString = boundary as any;
+      }
+      const distance = turf.pointToLineDistance(pt, lineString, { units: 'kilometers' });
       return distance;
     } else {
       // For other geometry types, use point to line distance
