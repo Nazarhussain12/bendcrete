@@ -39,6 +39,7 @@ export default function Home() {
   });
   const [clickMode, setClickMode] = useState(true); // Track if click on map is enabled
   const [basemap, setBasemap] = useState<BasemapType>('osm'); // Current basemap
+  const [showPanel, setShowPanel] = useState(false); // Show/hide panel on mobile (closed by default)
 
   // Load data files in parallel with progress tracking
   useEffect(() => {
@@ -250,26 +251,39 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-50">
+    <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
       {/* Left Panel - All content in one scrollable area */}
-      <div className="w-96 bg-white shadow-lg overflow-y-auto h-screen">
+      {/* Mobile: Overlay panel that slides in. Desktop: Fixed width sidebar */}
+      <div className={`${showPanel ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative inset-y-0 left-0 z-[9999] md:z-auto w-80 md:w-96 bg-white shadow-xl md:shadow-lg overflow-y-auto h-screen flex-shrink-0 transition-transform duration-300 ease-in-out`}>
         {/* Header */}
-        <div className="sticky top-0 z-10 p-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
-          <div className="flex items-center gap-3">
-            <img 
-              src="/logo.png" 
-              alt="Bendcrete Logo" 
-              className="h-8 w-8 object-contain"
-            />
-            <div>
-              <h1 className="text-xl font-bold">Bendcrete</h1>
-              <p className="text-sm text-blue-100 mt-1">Construction Site Assessment</p>
+        <div className="sticky top-0 z-10 p-3 md:p-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-3">
+              <img 
+                src="/logo.png" 
+                alt="Bendcrete Logo" 
+                className="h-6 w-6 md:h-8 md:w-8 object-contain"
+              />
+              <div>
+                <h1 className="text-lg md:text-xl font-bold">Bendcrete</h1>
+                <p className="text-xs md:text-sm text-blue-100 mt-0.5 md:mt-1">Construction Site Assessment</p>
+              </div>
             </div>
+            {/* Mobile: Close panel button */}
+            <button
+              onClick={() => setShowPanel(false)}
+              className="md:hidden p-2 hover:bg-blue-700 rounded transition-colors"
+              aria-label="Close panel"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* All Content - Single Scrollable Area */}
-        <div className="p-4 space-y-6">
+        <div className="p-3 md:p-4 space-y-4 md:space-y-6">
           {/* Risk Assessment */}
           <RiskAssessment
             location={selectedLocation}
@@ -336,12 +350,34 @@ export default function Home() {
         {/* Map Legend Overlay */}
         <MapLegend />
 
-        {/* Click Instruction */}
-        <div className="absolute top-4 right-4 z-[1000] bg-white rounded-lg shadow-lg p-3 text-sm">
+        {/* Click Instruction - Hidden on mobile, shown on desktop */}
+        <div className="hidden md:block absolute top-4 right-4 z-[1000] bg-white rounded-lg shadow-lg p-3 text-sm">
           <p className="text-gray-700 font-medium">
             {clickMode ? '📍 Click on map to assess location' : '📍 Click layers to view information'}
           </p>
         </div>
+
+        {/* Mobile: Panel toggle button - Fixed position in top-right, always visible when panel is closed */}
+        {!showPanel && (
+          <button
+            onClick={() => setShowPanel(true)}
+            className="md:hidden fixed top-4 right-4 z-[10000] bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-3 transition-all duration-200 flex items-center justify-center"
+            aria-label="Show panel"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+
+        {/* Mobile: Backdrop overlay when panel is open */}
+        {showPanel && (
+          <div
+            onClick={() => setShowPanel(false)}
+            className="md:hidden fixed inset-0 bg-black/50 z-[9998]"
+            aria-label="Close panel"
+          />
+        )}
 
       </div>
     </div>

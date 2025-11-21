@@ -119,9 +119,9 @@ export default function MapControls({
   };
 
   return (
-    <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
+    <div className="absolute top-2 left-2 md:top-4 md:left-4 z-[1000] flex flex-col gap-2 max-w-[calc(100vw-1rem)] md:max-w-none">
       {/* Location Search */}
-      <div className="bg-white rounded-lg shadow-lg p-2 flex gap-2 min-w-[300px]">
+      <div className="bg-white rounded-lg shadow-lg p-1.5 md:p-2 flex gap-1.5 md:gap-2 w-full md:min-w-[300px]">
         <div className="flex-1 relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -129,57 +129,57 @@ export default function MapControls({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Search address or location (e.g., Lahore, Karachi, Islamabad)..."
-            className="w-full pl-8 pr-2 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Search location..."
+            className="w-full pl-7 md:pl-8 pr-1.5 md:pr-2 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <button
           onClick={handleSearch}
           disabled={isSearching}
-          className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+          className="px-2 md:px-3 py-1.5 md:py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-xs md:text-sm font-medium"
         >
           {isSearching ? '...' : 'Go'}
         </button>
         <button
           onClick={onCurrentLocation}
-          className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center gap-1"
+          className="px-2 md:px-3 py-1.5 md:py-2 bg-green-600 text-white rounded hover:bg-green-700 text-xs md:text-sm flex items-center gap-1"
           title="Use current location"
         >
-          <Navigation className="w-4 h-4" />
-          <span className="text-xs">Current</span>
+          <Navigation className="w-3 h-3 md:w-4 md:h-4" />
+          <span className="hidden sm:inline text-xs">Current</span>
         </button>
       </div>
 
       {/* Click Mode Toggle */}
       <button
         onClick={() => onClickModeToggle(!clickMode)}
-        className={`rounded-lg shadow-lg p-2 flex items-center gap-2 transition-colors ${
+        className={`rounded-lg shadow-lg p-1.5 md:p-2 flex items-center gap-1.5 md:gap-2 transition-colors ${
           clickMode 
             ? 'bg-blue-600 text-white hover:bg-blue-700' 
             : 'bg-white text-gray-700 hover:bg-gray-50'
         }`}
         title={clickMode ? 'Click mode enabled - Click on map to select location' : 'Click mode disabled - Click layers to view info'}
       >
-        <MousePointer2 className="w-5 h-5" />
-        <span className="text-sm font-medium">Click Map</span>
+        <MousePointer2 className="w-4 h-4 md:w-5 md:h-5" />
+        <span className="text-xs md:text-sm font-medium">Click Map</span>
       </button>
 
       {/* Basemap Toggle Button */}
       <button
         onClick={() => setShowBasemaps(!showBasemaps)}
-        className="bg-white rounded-lg shadow-lg p-2 flex items-center gap-2 hover:bg-gray-50 transition-colors"
+        className="bg-white rounded-lg shadow-lg p-1.5 md:p-2 flex items-center gap-1.5 md:gap-2 hover:bg-gray-50 transition-colors"
         title="Change basemap"
       >
-        <Map className="w-5 h-5 text-gray-700" />
-        <span className="text-sm font-medium text-gray-700">Basemap</span>
+        <Map className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
+        <span className="text-xs md:text-sm font-medium text-gray-700">Basemap</span>
       </button>
 
       {/* Basemap Selection Panel */}
       {showBasemaps && (
-        <div className="bg-white rounded-lg shadow-lg p-3 min-w-[200px]">
-          <h3 className="text-sm font-semibold mb-2 text-gray-700">Select Basemap</h3>
+        <div className="bg-white rounded-lg shadow-lg p-2 md:p-3 w-full md:min-w-[200px]">
+          <h3 className="text-xs md:text-sm font-semibold mb-2 text-gray-700">Select Basemap</h3>
           <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+            <label className="flex items-center gap-2 cursor-pointer p-1.5 md:p-2 rounded hover:bg-gray-50">
               <input
                 type="radio"
                 name="basemap"
@@ -189,11 +189,11 @@ export default function MapControls({
                   onBasemapChange('osm');
                   setShowBasemaps(false);
                 }}
-                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">OpenStreetMap</span>
+              <span className="text-xs md:text-sm text-gray-700">OpenStreetMap</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+            <label className="flex items-center gap-2 cursor-pointer p-1.5 md:p-2 rounded hover:bg-gray-50">
               <input
                 type="radio"
                 name="basemap"
@@ -203,9 +203,9 @@ export default function MapControls({
                   onBasemapChange('arcgis-satellite');
                   setShowBasemaps(false);
                 }}
-                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Satellite Map</span>
+              <span className="text-xs md:text-sm text-gray-700">Satellite Map</span>
             </label>
           </div>
         </div>
@@ -214,34 +214,34 @@ export default function MapControls({
       {/* Layer Toggle Button */}
       <button
         onClick={() => setShowLayers(!showLayers)}
-        className="bg-white rounded-lg shadow-lg p-2 flex items-center gap-2 hover:bg-gray-50 transition-colors"
+        className="bg-white rounded-lg shadow-lg p-1.5 md:p-2 flex items-center gap-1.5 md:gap-2 hover:bg-gray-50 transition-colors"
       >
-        <Layers className="w-5 h-5 text-gray-700" />
-        <span className="text-sm font-medium text-gray-700">Layers</span>
+        <Layers className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
+        <span className="text-xs md:text-sm font-medium text-gray-700">Layers</span>
       </button>
 
       {/* Layer Controls Panel */}
       {showLayers && (
-        <div className="bg-white rounded-lg shadow-lg p-3 min-w-[200px]">
-          <h3 className="text-sm font-semibold mb-2 text-gray-700">Toggle Layers</h3>
+        <div className="bg-white rounded-lg shadow-lg p-2 md:p-3 w-full md:min-w-[200px]">
+          <h3 className="text-xs md:text-sm font-semibold mb-2 text-gray-700">Toggle Layers</h3>
           <div className="space-y-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={layerVisibility.earthquakeZones}
                 onChange={() => onLayerToggle('earthquakeZones')}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600 rounded focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Earthquake Zones</span>
+              <span className="text-xs md:text-sm text-gray-700">Earthquake Zones</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={layerVisibility.floodExtent}
                 onChange={() => onLayerToggle('floodExtent')}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600 rounded focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Flood Extent</span>
+              <span className="text-xs md:text-sm text-gray-700">Flood Extent</span>
             </label>
           </div>
         </div>

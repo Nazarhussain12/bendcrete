@@ -145,22 +145,22 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
   const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#ef4444'];
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-bold text-gray-900 mb-3">Construction Cost Estimation</h2>
+    <div className="space-y-3 md:space-y-4">
+      <h2 className="text-base md:text-lg font-bold text-gray-900 mb-2 md:mb-3">Construction Cost Estimation</h2>
       
       {/* Cost Summary Cards */}
-      <div className="grid grid-cols-1 gap-3">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-600 font-medium mb-1">Base Cost (per sqft)</p>
-          <p className="text-2xl font-bold text-blue-900">Rs. {baseCostPerSqft.toLocaleString()}</p>
+      <div className="grid grid-cols-1 gap-2 md:gap-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4">
+          <p className="text-xs md:text-sm text-blue-600 font-medium mb-1">Base Cost (per sqft)</p>
+          <p className="text-xl md:text-2xl font-bold text-blue-900">Rs. {baseCostPerSqft.toLocaleString()}</p>
         </div>
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-          <p className="text-sm text-orange-600 font-medium mb-1">Adjusted Cost (per sqft)</p>
-          <p className="text-2xl font-bold text-orange-900">Rs. {adjustedCostPerSqft.toLocaleString()}</p>
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 md:p-4">
+          <p className="text-xs md:text-sm text-orange-600 font-medium mb-1">Adjusted Cost (per sqft)</p>
+          <p className="text-xl md:text-2xl font-bold text-orange-900">Rs. {adjustedCostPerSqft.toLocaleString()}</p>
         </div>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-sm text-green-600 font-medium mb-1">Total (1000 sqft house)</p>
-          <p className="text-2xl font-bold text-green-900">Rs. {totalCost.toLocaleString()}</p>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 md:p-4">
+          <p className="text-xs md:text-sm text-green-600 font-medium mb-1">Total (1000 sqft house)</p>
+          <p className="text-xl md:text-2xl font-bold text-green-900">Rs. {totalCost.toLocaleString()}</p>
         </div>
       </div>
 
@@ -211,7 +211,7 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+              label={({ percent }) => percent ? `${(percent * 100).toFixed(0)}%` : ''}
               outerRadius={70}
               fill="#8884d8"
               dataKey="value"

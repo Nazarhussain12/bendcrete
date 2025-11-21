@@ -106,10 +106,10 @@ export default function RiskAssessment({ location, floodRisk, earthquakeZone, el
   };
 
   return (
-    <div className="space-y-4">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Risk Assessment</h2>
-        <p className="text-sm text-gray-500 mt-1">Click on map to analyze a location</p>
+    <div className="space-y-3 md:space-y-4">
+      <div className="mb-3 md:mb-4">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Risk Assessment</h2>
+        <p className="text-xs md:text-sm text-gray-500 mt-1">Click on map to analyze a location</p>
       </div>
       
       {/* Location Info */}

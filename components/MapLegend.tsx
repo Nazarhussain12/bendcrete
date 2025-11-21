@@ -2,9 +2,9 @@
 
 export default function MapLegend() {
   return (
-    <div className="absolute bottom-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-4 max-w-[280px]">
-      <h3 className="text-sm font-semibold mb-3 text-gray-800">Map Legend</h3>
-      <div className="space-y-2 text-xs">
+    <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 z-[1000] bg-white rounded-lg shadow-lg p-2 md:p-4 max-w-[calc(100vw-1rem)] md:max-w-[280px]">
+      <h3 className="text-xs md:text-sm font-semibold mb-2 md:mb-3 text-gray-800">Map Legend</h3>
+      <div className="space-y-1.5 md:space-y-2 text-[10px] md:text-xs">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-400 opacity-30 border border-green-600 rounded"></div>
           <span className="text-gray-700">Zone 1 (Low Risk)</span>

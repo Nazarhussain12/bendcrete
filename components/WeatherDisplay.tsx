@@ -104,10 +104,10 @@ export default function WeatherDisplay({ location }: WeatherDisplayProps) {
   })) || [];
 
   return (
-    <div className="space-y-4">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-gray-900">Weather Information</h2>
-        <p className="text-sm text-gray-500 mt-1">{weather.location}</p>
+    <div className="space-y-3 md:space-y-4">
+      <div className="mb-3 md:mb-4">
+        <h2 className="text-lg md:text-xl font-bold text-gray-900">Weather Information</h2>
+        <p className="text-xs md:text-sm text-gray-500 mt-1">{weather.location}</p>
       </div>
 
       {/* Current Weather Card */}
@@ -128,8 +128,8 @@ export default function WeatherDisplay({ location }: WeatherDisplayProps) {
         </div>
 
         {/* Weather Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="bg-white/60 rounded-lg p-2 flex items-center gap-2">
+        <div className="grid grid-cols-2 gap-2 md:gap-3 mt-3 md:mt-4">
+          <div className="bg-white/60 rounded-lg p-1.5 md:p-2 flex items-center gap-1.5 md:gap-2">
             <Droplet className="w-5 h-5 text-blue-600" />
             <div>
               <div className="text-xs text-gray-600">Humidity</div>
