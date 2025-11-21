@@ -1,17 +1,44 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Point, FloodRisk, EarthquakeZoneResult } from '@/lib/geospatial-utils';
 import { getZoneInfo } from '@/lib/earthquake-zones-info';
+import { ElevationData } from '@/lib/elevation';
+import { getCurrentWeather, WeatherData } from '@/lib/weather';
 
 interface ConstructionCostProps {
   location: Point | null;
   floodRisk: FloodRisk | null;
   earthquakeZone: EarthquakeZoneResult | null;
+  elevation: ElevationData | null;
   baseCost: number; // Base construction cost per square foot
 }
 
-export default function ConstructionCost({ location, floodRisk, earthquakeZone, baseCost = 2000 }: ConstructionCostProps) {
+export default function ConstructionCost({ location, floodRisk, earthquakeZone, elevation, baseCost = 2000 }: ConstructionCostProps) {
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loadingWeather, setLoadingWeather] = useState(false);
+
+  // Fetch weather data when location changes
+  useEffect(() => {
+    if (!location) {
+      setWeather(null);
+      return;
+    }
+
+    setLoadingWeather(true);
+    getCurrentWeather(location)
+      .then((weatherData) => {
+        setWeather(weatherData);
+        setLoadingWeather(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching weather for cost calculation:', error);
+        setWeather(null);
+        setLoadingWeather(false);
+      });
+  }, [location]);
+
   if (!location) {
     return (
       <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
@@ -25,12 +52,50 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
   // Calculate cost multipliers
   const earthquakeMultiplier = zoneInfo?.costMultiplier || 1.0;
   const floodMultiplier = floodRisk?.level === 'High Risk' ? 1.3 : floodRisk?.level === 'Medium Risk' ? 1.15 : 1.0;
-  const totalMultiplier = earthquakeMultiplier * floodMultiplier;
+  
+  // Elevation multiplier: Higher elevation = more cost (access, materials transport)
+  // Very high elevation (>2000m) adds 10-20% cost, moderate (500-2000m) adds 5-10%
+  let elevationMultiplier = 1.0;
+  if (elevation) {
+    if (elevation.elevation > 2000) {
+      elevationMultiplier = 1.15; // 15% increase for very high elevation
+    } else if (elevation.elevation > 1000) {
+      elevationMultiplier = 1.10; // 10% increase for high elevation
+    } else if (elevation.elevation > 500) {
+      elevationMultiplier = 1.05; // 5% increase for moderate elevation
+    }
+  }
+  
+  // Weather multiplier: Extreme weather conditions add costs
+  // High humidity, extreme temperatures, high wind speeds increase construction costs
+  let weatherMultiplier = 1.0;
+  if (weather) {
+    // High humidity (>80%) adds 3% for moisture protection
+    if (weather.humidity > 80) {
+      weatherMultiplier += 0.03;
+    }
+    // Extreme temperatures add costs
+    if (weather.temperature > 40 || weather.temperature < 0) {
+      weatherMultiplier += 0.05; // 5% for extreme temperatures
+    }
+    // High wind speeds (>30 km/h average) add costs for wind-resistant construction
+    if (typeof weather.windSpeed === 'number' && weather.windSpeed > 30) {
+      weatherMultiplier += 0.04; // 4% for high wind areas
+    }
+    // High precipitation risk (if humidity is very high and temperature is moderate)
+    if (weather.humidity > 85 && weather.temperature > 15 && weather.temperature < 35) {
+      weatherMultiplier += 0.02; // 2% for high precipitation risk
+    }
+  }
+  
+  const totalMultiplier = earthquakeMultiplier * floodMultiplier * elevationMultiplier * weatherMultiplier;
   
   // Cost breakdown
   const baseCostPerSqft = baseCost;
   const earthquakeCost = baseCostPerSqft * (earthquakeMultiplier - 1);
   const floodCost = baseCostPerSqft * (floodMultiplier - 1);
+  const elevationCost = baseCostPerSqft * (elevationMultiplier - 1);
+  const weatherCost = baseCostPerSqft * (weatherMultiplier - 1);
   const adjustedCostPerSqft = baseCostPerSqft * totalMultiplier;
   
   // Example for 1000 sqft house
@@ -43,13 +108,33 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
   const costBreakdown = [
     { name: 'Base Construction', value: baseTotalCost, color: '#3b82f6' },
     { name: 'Earthquake Mitigation', value: earthquakeCost * houseSize, color: '#f59e0b' },
-    { name: 'Flood Protection', value: floodCost * houseSize, color: '#10b981' }
+    { name: 'Flood Protection', value: floodCost * houseSize, color: '#10b981' },
+    { name: 'Elevation Factors', value: elevationCost * houseSize, color: '#8b5cf6' },
+    { name: 'Weather Adaptation', value: weatherCost * houseSize, color: '#ec4899' }
   ].filter(item => item.value > 0);
 
   const multiplierData = [
     { factor: 'Base Cost', multiplier: 1.0, cost: baseCostPerSqft },
-    { factor: 'Earthquake Zone', multiplier: earthquakeMultiplier, cost: baseCostPerSqft * earthquakeMultiplier },
-    { factor: 'Flood Risk', multiplier: floodMultiplier, cost: baseCostPerSqft * earthquakeMultiplier * floodMultiplier },
+    { 
+      factor: 'Earthquake Zone', 
+      multiplier: earthquakeMultiplier, 
+      cost: baseCostPerSqft * earthquakeMultiplier
+    },
+    { 
+      factor: 'Flood Risk', 
+      multiplier: floodMultiplier, 
+      cost: baseCostPerSqft * earthquakeMultiplier * floodMultiplier
+    },
+    { 
+      factor: 'Elevation', 
+      multiplier: elevationMultiplier, 
+      cost: baseCostPerSqft * earthquakeMultiplier * floodMultiplier * elevationMultiplier
+    },
+    { 
+      factor: 'Weather', 
+      multiplier: weatherMultiplier, 
+      cost: baseCostPerSqft * totalMultiplier
+    },
   ];
 
   const pieData = costBreakdown.map(item => ({
@@ -57,7 +142,7 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
     value: Math.round(item.value)
   }));
 
-  const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
+  const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#ef4444'];
 
   return (
     <div className="space-y-4">
@@ -174,6 +259,33 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
         </div>
       </div>
 
+      {/* Elevation & Weather Info */}
+      {(elevation || weather) && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+          <h3 className="text-xs font-semibold mb-2 text-purple-700">Site Conditions:</h3>
+          <div className="space-y-1 text-xs text-purple-600">
+            {elevation && (
+              <p>📍 Elevation: {elevation.elevation.toFixed(0)} m 
+                {elevationMultiplier > 1.0 && ` (${((elevationMultiplier - 1) * 100).toFixed(0)}% cost increase)`}
+              </p>
+            )}
+            {loadingWeather && (
+              <p>🌤️ Loading weather data...</p>
+            )}
+            {weather && (
+              <div className="space-y-1">
+                <p>🌤️ Weather: {weather.temperature}°C, {weather.humidity}% humidity, {typeof weather.windSpeed === 'number' ? weather.windSpeed.toFixed(0) : weather.windSpeed} km/h wind</p>
+                {weatherMultiplier > 1.0 && (
+                  <p className="text-purple-700 font-medium">
+                    Weather conditions add {((weatherMultiplier - 1) * 100).toFixed(1)}% to construction costs
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Cost Notes */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
         <h3 className="text-xs font-semibold mb-2 text-gray-700">Notes:</h3>
@@ -181,6 +293,8 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
           <li>Base cost assumes standard construction</li>
           <li>Earthquake mitigation: seismic reinforcement & foundation</li>
           <li>Flood protection: elevated foundations & waterproofing</li>
+          <li>Elevation factors: access, material transport, site preparation</li>
+          <li>Weather adaptation: moisture protection, temperature control, wind resistance</li>
           <li>Costs may vary based on site conditions</li>
           <li>Consult professionals for accurate estimates</li>
         </ul>

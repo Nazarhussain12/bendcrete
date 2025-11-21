@@ -1,8 +1,9 @@
 'use client';
 
-import { Search, MapPin, Navigation, Layers, MousePointer2 } from 'lucide-react';
+import { Search, MapPin, Navigation, Layers, MousePointer2, Map } from 'lucide-react';
 import { useState } from 'react';
 import { Point } from '@/lib/geospatial-utils';
+import { BasemapType } from './MapView';
 
 interface MapControlsProps {
   onLocationSelect: (point: Point) => void;
@@ -14,6 +15,8 @@ interface MapControlsProps {
   onLayerToggle: (layer: 'earthquakeZones' | 'floodExtent') => void;
   clickMode: boolean;
   onClickModeToggle: (enabled: boolean) => void;
+  basemap: BasemapType;
+  onBasemapChange: (basemap: BasemapType) => void;
 }
 
 export default function MapControls({
@@ -22,11 +25,14 @@ export default function MapControls({
   layerVisibility,
   onLayerToggle,
   clickMode,
-  onClickModeToggle
+  onClickModeToggle,
+  basemap,
+  onBasemapChange
 }: MapControlsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [showLayers, setShowLayers] = useState(false);
+  const [showBasemaps, setShowBasemaps] = useState(false);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -157,6 +163,53 @@ export default function MapControls({
         <MousePointer2 className="w-5 h-5" />
         <span className="text-sm font-medium">Click Map</span>
       </button>
+
+      {/* Basemap Toggle Button */}
+      <button
+        onClick={() => setShowBasemaps(!showBasemaps)}
+        className="bg-white rounded-lg shadow-lg p-2 flex items-center gap-2 hover:bg-gray-50 transition-colors"
+        title="Change basemap"
+      >
+        <Map className="w-5 h-5 text-gray-700" />
+        <span className="text-sm font-medium text-gray-700">Basemap</span>
+      </button>
+
+      {/* Basemap Selection Panel */}
+      {showBasemaps && (
+        <div className="bg-white rounded-lg shadow-lg p-3 min-w-[200px]">
+          <h3 className="text-sm font-semibold mb-2 text-gray-700">Select Basemap</h3>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+              <input
+                type="radio"
+                name="basemap"
+                value="osm"
+                checked={basemap === 'osm'}
+                onChange={() => {
+                  onBasemapChange('osm');
+                  setShowBasemaps(false);
+                }}
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">OpenStreetMap</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+              <input
+                type="radio"
+                name="basemap"
+                value="arcgis-satellite"
+                checked={basemap === 'arcgis-satellite'}
+                onChange={() => {
+                  onBasemapChange('arcgis-satellite');
+                  setShowBasemaps(false);
+                }}
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Satellite Map</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       {/* Layer Toggle Button */}
       <button

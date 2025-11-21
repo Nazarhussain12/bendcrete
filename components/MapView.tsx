@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, GeoJSON, useMap, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, useMap, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Point } from '@/lib/geospatial-utils';
@@ -16,6 +16,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
+export type BasemapType = 'osm' | 'arcgis-satellite';
+
 interface MapViewProps {
   selectedLocation: Point | null;
   onLocationSelect: (point: Point) => void;
@@ -26,6 +28,7 @@ interface MapViewProps {
     floodExtent: boolean;
   };
   clickMode: boolean;
+  basemap?: BasemapType;
 }
 
 function MapController({ center, zoom }: { center: [number, number]; zoom: number }) {
@@ -36,23 +39,108 @@ function MapController({ center, zoom }: { center: [number, number]; zoom: numbe
   return null;
 }
 
+// Component to handle map click events
+function MapClickHandler({ 
+  clickMode, 
+  onLocationSelect 
+}: { 
+  clickMode: boolean; 
+  onLocationSelect: (point: Point) => void;
+}) {
+  const map = useMap();
+  const clickModeRef = useRef(clickMode);
+  const onLocationSelectRef = useRef(onLocationSelect);
+
+  useEffect(() => {
+    clickModeRef.current = clickMode;
+  }, [clickMode]);
+
+  useEffect(() => {
+    onLocationSelectRef.current = onLocationSelect;
+  }, [onLocationSelect]);
+
+  useEffect(() => {
+    const handleMapClick = (e: L.LeafletMouseEvent) => {
+      if (clickModeRef.current) {
+        onLocationSelectRef.current({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng
+        });
+      }
+    };
+
+    map.on('click', handleMapClick);
+
+    return () => {
+      map.off('click', handleMapClick);
+    };
+  }, [map]);
+
+  return null;
+}
+
+// Custom ArcGIS Tile Layer Component
+// ArcGIS REST services use {z}/{y}/{x} URL format
+// Testing both TMS and non-TMS approaches to find the correct one
+function ArcGISTileLayer({ url, attribution }: { url: string; attribution: string }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (!map) return;
+    
+    // Try WITHOUT TMS first - ArcGIS might use {z}/{y}/{x} pattern but standard coordinates
+    const arcgisLayer = L.tileLayer(url, {
+      attribution: attribution,
+      maxZoom: 19,
+      minZoom: 0,
+      tileSize: 256,
+      zoomOffset: 0,
+      tms: false, // Try without TMS first
+    });
+    
+    // Override getTileUrl to use ArcGIS {z}/{y}/{x} format
+    // Testing: ArcGIS might use {z}/{y}/{x} URL pattern but with standard coordinates (no inversion)
+    arcgisLayer.getTileUrl = function(coords: L.Coords) {
+      const z = coords.z;
+      const x = coords.x;
+      // Try WITHOUT inversion first - ArcGIS {z}/{y}/{x} might just be URL format, not TMS
+      const y = coords.y; // Use y directly without inversion
+      const tileUrl = url.replace('{z}', z.toString()).replace('{y}', y.toString()).replace('{x}', x.toString());
+      return tileUrl;
+    };
+    
+    arcgisLayer.addTo(map);
+    
+    return () => {
+      map.removeLayer(arcgisLayer);
+    };
+  }, [map, url, attribution]);
+  
+  return null;
+}
+
 export default function MapView({
   selectedLocation,
   onLocationSelect,
   earthquakeZones,
   floodExtent,
   layerVisibility,
-  clickMode
+  clickMode,
+  basemap = 'osm'
 }: MapViewProps) {
-  const [map, setMap] = useState<L.Map | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
   const clickModeRef = useRef(clickMode);
+  const onLocationSelectRef = useRef(onLocationSelect);
 
-  // Update ref when clickMode changes
+  // Update refs when props change (needed for GeoJSON layer click handlers)
   useEffect(() => {
     clickModeRef.current = clickMode;
   }, [clickMode]);
+
+  useEffect(() => {
+    onLocationSelectRef.current = onLocationSelect;
+  }, [onLocationSelect]);
 
   // Pakistan center coordinates
   const pakistanCenter: [number, number] = [30.3753, 69.3451];
@@ -94,15 +182,6 @@ export default function MapView({
     }
   }, [selectedLocation]);
 
-  const handleMapClick = (e: L.LeafletMouseEvent) => {
-    if (clickMode) {
-      // When click mode is on, always select location
-      onLocationSelect({
-        lat: e.latlng.lat,
-        lng: e.latlng.lng
-      });
-    }
-  };
 
   // Style functions for layers
   const getEarthquakeZoneStyle = (feature: any) => {
@@ -131,6 +210,38 @@ export default function MapView({
     opacity: 0.6
   });
 
+  // Get basemap URL and attribution based on selected basemap
+  // Note: Both basemaps use Web Mercator (EPSG:3857) projection, same as Leaflet default
+  // Coordinates (lat/lng) work the same for both basemaps
+  const getBasemapConfig = () => {
+    switch (basemap) {
+      case 'arcgis-satellite':
+        // ArcGIS World Imagery - uses standard Web Mercator (EPSG:3857)
+        // Same projection as OpenStreetMap, so coordinates work identically
+        // Using custom component to handle {z}/{y}/{x} URL format correctly
+        const arcgisUrl = 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+        return {
+          url: arcgisUrl,
+          attribution: '&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community',
+          tms: true, // Custom component handles TMS correctly
+          maxZoom: 19,
+          minZoom: 0
+        };
+      case 'osm':
+      default:
+        // OpenStreetMap - uses standard Web Mercator (EPSG:3857)
+        // Same projection as ArcGIS, coordinates are compatible
+        return {
+          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          tms: false,
+          maxZoom: 19,
+          minZoom: 0
+        };
+    }
+  };
+
+  const basemapConfig = getBasemapConfig();
 
   return (
     <div className="w-full h-full relative">
@@ -138,15 +249,34 @@ export default function MapView({
         center={pakistanCenter}
         zoom={defaultZoom}
         style={{ height: '100%', width: '100%', zIndex: 0 }}
-        whenCreated={setMap}
-        eventHandlers={{
-          click: handleMapClick
-        }}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        {basemap === 'arcgis-satellite' ? (
+          <ArcGISTileLayer 
+            url={basemapConfig.url}
+            attribution={basemapConfig.attribution}
+          />
+        ) : (
+          <TileLayer
+            key={basemap}
+            attribution={basemapConfig.attribution}
+            url={basemapConfig.url}
+            tms={basemapConfig.tms}
+            maxZoom={basemapConfig.maxZoom}
+            minZoom={basemapConfig.minZoom}
+            noWrap={false}
+            bounds={undefined}
+            tileSize={256}
+            zoomOffset={0}
+            eventHandlers={{
+            load: (e) => {
+              // Tile layer loaded successfully
+            }
+            }}
+          />
+        )}
+        
+        {/* Map click handler */}
+        <MapClickHandler clickMode={clickMode} onLocationSelect={onLocationSelect} />
         
         {/* Earthquake Zones Layer - if visible (render first, so flood is on top) */}
         {earthquakeZones && layerVisibility.earthquakeZones && (
@@ -163,8 +293,11 @@ export default function MapView({
               // Use ref to always get current clickMode value
               layer.on('click', (e) => {
                 if (clickModeRef.current) {
-                  // When click mode is ON: don't stop propagation - let map click handler work
-                  // The map click will select the location
+                  // When click mode is ON: select location immediately
+                  onLocationSelectRef.current({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng
+                  });
                   // Also show layer popup after a delay
                   setTimeout(() => {
                     layer.openPopup(e.latlng);
@@ -192,8 +325,11 @@ export default function MapView({
               // Use ref to always get current clickMode value
               layer.on('click', (e) => {
                 if (clickModeRef.current) {
-                  // When click mode is ON: don't stop propagation - let map click handler work
-                  // The map click will select the location
+                  // When click mode is ON: select location immediately
+                  onLocationSelectRef.current({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng
+                  });
                   // Also show layer popup after a delay
                   setTimeout(() => {
                     layer.openPopup(e.latlng);
@@ -243,7 +379,8 @@ export default function MapView({
           </Marker>
         )}
 
-        <MapController center={selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : pakistanCenter} zoom={selectedLocation ? 12 : defaultZoom} />
+        <MapController center={selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : pakistanCenter} zoom={selectedLocation ? 17
+           : defaultZoom} />
       </MapContainer>
     </div>
   );

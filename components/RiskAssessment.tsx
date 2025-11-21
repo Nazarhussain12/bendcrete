@@ -5,15 +5,19 @@ import { AlertTriangle, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { Point, FloodRisk, EarthquakeZoneResult } from '@/lib/geospatial-utils';
 import { getZoneInfo } from '@/lib/earthquake-zones-info';
 import { reverseGeocode } from '@/lib/geocoding';
+import { ElevationData } from '@/lib/elevation';
+import { Mountain } from 'lucide-react';
 
 interface RiskAssessmentProps {
   location: Point | null;
   floodRisk: FloodRisk | null;
   earthquakeZone: EarthquakeZoneResult | null;
+  elevation: ElevationData | null;
+  loadingElevation?: boolean;
   calculating?: boolean;
 }
 
-export default function RiskAssessment({ location, floodRisk, earthquakeZone, calculating = false }: RiskAssessmentProps) {
+export default function RiskAssessment({ location, floodRisk, earthquakeZone, elevation, loadingElevation = false, calculating = false }: RiskAssessmentProps) {
   const [address, setAddress] = useState<string | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
 
@@ -134,6 +138,26 @@ export default function RiskAssessment({ location, floodRisk, earthquakeZone, ca
             </p>
           </div>
         )}
+        
+        {/* Elevation Info */}
+        <div className="mt-3 pt-3 border-t border-blue-300">
+          <div className="flex items-center gap-2">
+            <Mountain className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-medium text-blue-900">Elevation:</span>
+            {loadingElevation ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                <span className="text-xs text-blue-700">Loading...</span>
+              </div>
+            ) : elevation ? (
+              <span className="text-sm text-blue-900 font-semibold">
+                {elevation.elevation.toFixed(0)} m ({((elevation.elevation * 3.28084)).toFixed(0)} ft)
+              </span>
+            ) : (
+              <span className="text-xs text-blue-600">Not available</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Flood Risk */}

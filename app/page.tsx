@@ -7,6 +7,8 @@ import MapLegend from '@/components/MapLegend';
 import RiskAssessment from '@/components/RiskAssessment';
 import WeatherDisplay from '@/components/WeatherDisplay';
 import { Point, checkFloodRisk, findEarthquakeZone } from '@/lib/geospatial-utils';
+import { getElevation, ElevationData } from '@/lib/elevation';
+import { BasemapType } from '@/components/MapView';
 import * as turf from '@turf/turf';
 
 // Dynamically import MapView to avoid SSR issues with Leaflet
@@ -25,6 +27,8 @@ export default function Home() {
   const [floodExtent, setFloodExtent] = useState<any>(null);
   const [floodRisk, setFloodRisk] = useState<any>(null);
   const [earthquakeZone, setEarthquakeZone] = useState<any>(null);
+  const [elevation, setElevation] = useState<ElevationData | null>(null);
+  const [loadingElevation, setLoadingElevation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState({ step: '', progress: 0 });
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +38,7 @@ export default function Home() {
     floodExtent: true
   });
   const [clickMode, setClickMode] = useState(true); // Track if click on map is enabled
+  const [basemap, setBasemap] = useState<BasemapType>('osm'); // Current basemap
 
   // Load data files in parallel with progress tracking
   useEffect(() => {
@@ -84,6 +89,7 @@ export default function Home() {
       setFloodRisk(null);
       setEarthquakeZone(null);
       setCalculatingRisk(false);
+      setElevation(null);
       return;
     }
 
@@ -109,26 +115,101 @@ export default function Home() {
     };
   }, [selectedLocation, earthquakeZones, floodExtent]);
 
+  // Fetch elevation when location changes
+  useEffect(() => {
+    if (!selectedLocation) {
+      setElevation(null);
+      return;
+    }
+
+    setLoadingElevation(true);
+    getElevation(selectedLocation)
+      .then((elevationData) => {
+        setElevation(elevationData);
+        setLoadingElevation(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching elevation:', error);
+        setElevation(null);
+        setLoadingElevation(false);
+      });
+  }, [selectedLocation]);
+
   const handleLocationSelect = (point: Point) => {
     setSelectedLocation(point);
   };
 
   const handleCurrentLocation = () => {
     if (navigator.geolocation) {
+      // Use high accuracy options for better location precision
+      const options: PositionOptions = {
+        enableHighAccuracy: true, // Use GPS if available for better accuracy
+        timeout: 15000, // 15 second timeout
+        maximumAge: 60000 // Accept cached position if less than 1 minute old
+      };
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setSelectedLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const accuracy = position.coords.accuracy; // Accuracy in meters
+          
+          // Validate location is within reasonable bounds (Pakistan approximately: 23.5-37.0°N, 60.8-77.8°E)
+          // Allow some margin for edge cases
+          const isWithinPakistanBounds = 
+            lat >= 23.0 && lat <= 38.0 && 
+            lng >= 60.0 && lng <= 78.5;
+          
+          if (isWithinPakistanBounds) {
+            setSelectedLocation({
+              lat: lat,
+              lng: lng
+            });
+            
+            // Show accuracy info if accuracy is poor (>1000m)
+            if (accuracy > 1000) {
+              console.warn(`Location accuracy is ${Math.round(accuracy)}m - may not be precise`);
+            }
+          } else {
+            // Location seems to be outside Pakistan - ask user to confirm
+            const confirm = window.confirm(
+              `Detected location: ${lat.toFixed(4)}, ${lng.toFixed(4)}\n` +
+              `This appears to be outside Pakistan. Accuracy: ${Math.round(accuracy)}m\n\n` +
+              `Do you want to use this location anyway?`
+            );
+            if (confirm) {
+              setSelectedLocation({
+                lat: lat,
+                lng: lng
+              });
+            } else {
+              alert('Please select your location manually on the map or try again.');
+            }
+          }
         },
         (error) => {
-          alert('Unable to get your location. Please allow location access or select manually.');
+          let errorMessage = 'Unable to get your location. ';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage += 'Location access was denied. Please allow location access in your browser settings.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage += 'Location information is unavailable. Please try again or select manually.';
+              break;
+            case error.TIMEOUT:
+              errorMessage += 'Location request timed out. Please try again or select manually.';
+              break;
+            default:
+              errorMessage += 'An unknown error occurred. Please select your location manually.';
+              break;
+          }
+          alert(errorMessage);
           console.error('Geolocation error:', error);
-        }
+        },
+        options
       );
     } else {
-      alert('Geolocation is not supported by your browser.');
+      alert('Geolocation is not supported by your browser. Please select your location manually on the map.');
     }
   };
 
@@ -174,8 +255,17 @@ export default function Home() {
       <div className="w-96 bg-white shadow-lg overflow-y-auto h-screen">
         {/* Header */}
         <div className="sticky top-0 z-10 p-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
-          <h1 className="text-xl font-bold">Bendcrete</h1>
-          <p className="text-sm text-blue-100 mt-1">Construction Site Assessment</p>
+          <div className="flex items-center gap-3">
+            <img 
+              src="/logo.png" 
+              alt="Bendcrete Logo" 
+              className="h-8 w-8 object-contain"
+            />
+            <div>
+              <h1 className="text-xl font-bold">Bendcrete</h1>
+              <p className="text-sm text-blue-100 mt-1">Construction Site Assessment</p>
+            </div>
+          </div>
         </div>
 
         {/* All Content - Single Scrollable Area */}
@@ -185,6 +275,8 @@ export default function Home() {
             location={selectedLocation}
             floodRisk={floodRisk}
             earthquakeZone={earthquakeZone}
+            elevation={elevation}
+            loadingElevation={loadingElevation}
             calculating={calculatingRisk}
           />
           
@@ -202,6 +294,7 @@ export default function Home() {
                 location={selectedLocation}
                 floodRisk={floodRisk}
                 earthquakeZone={earthquakeZone}
+                elevation={elevation}
                 baseCost={2000}
               />
             </div>
@@ -225,6 +318,7 @@ export default function Home() {
           floodExtent={floodExtent}
           layerVisibility={layerVisibility}
           clickMode={clickMode}
+          basemap={basemap}
         />
         
         {/* Map Controls Overlay */}
@@ -235,6 +329,8 @@ export default function Home() {
           onLayerToggle={handleLayerToggle}
           clickMode={clickMode}
           onClickModeToggle={setClickMode}
+          basemap={basemap}
+          onBasemapChange={setBasemap}
         />
 
         {/* Map Legend Overlay */}
