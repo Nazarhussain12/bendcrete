@@ -272,17 +272,17 @@ export default function Home() {
       {/* Mobile: Overlay panel that slides in. Desktop: Fixed width sidebar */}
       <div className={`${showPanel ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative inset-y-0 left-0 z-[9999] md:z-auto w-80 md:w-96 bg-white shadow-xl md:shadow-lg h-screen flex-shrink-0 transition-transform duration-300 ease-in-out flex flex-col`}>
         {/* Header */}
-        <div className="flex-shrink-0 p-3 md:p-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
+        <div className="flex-shrink-0 p-3 md:p-4 border-b bg-white shadow-md">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-3 md:gap-4">
               <img 
                 src="/logo.png" 
                 alt="NDMA Logo" 
-                className="h-6 w-6 md:h-8 md:w-8 object-contain"
+                className="h-12 w-12 md:h-16 md:w-16 object-contain flex-shrink-0"
               />
               <div>
-                <h1 className="text-lg md:text-xl font-bold">NDMA Resilient Construction Platform</h1>
-                <p className="text-xs md:text-sm text-blue-100 mt-0.5 md:mt-1">Construction Site Assessment</p>
+                <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">NDMA</h1>
+                <p className="text-xs md:text-sm text-gray-700 mt-0.5 md:mt-1 font-medium">Resilient Construction Platform</p>
               </div>
             </div>
             {/* Mobile: Close panel button */}
