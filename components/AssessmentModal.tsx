@@ -75,7 +75,6 @@ interface AssessmentModalProps {
   earthquakeZone: EarthquakeZoneResult | null;
   elevation: ElevationData | null;
   weather: WeatherData | null;
-  onOpenWeatherModal?: () => void;
 }
 
 export default function AssessmentModal({
@@ -651,8 +650,7 @@ function AssessmentView({
   weather,
   tempCategory,
   overallRisk,
-  onConstructionToolClick,
-  onOpenWeatherModal
+  onConstructionToolClick
 }: {
   location: Point | null;
   address: string | null;
