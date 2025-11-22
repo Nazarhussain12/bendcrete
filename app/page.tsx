@@ -6,8 +6,10 @@ import MapControls from '@/components/MapControls';
 import MapLegend from '@/components/MapLegend';
 import RiskAssessment from '@/components/RiskAssessment';
 import WeatherDisplay from '@/components/WeatherDisplay';
+import AssessmentModal from '@/components/AssessmentModal';
 import { Point, checkFloodRisk, findEarthquakeZone } from '@/lib/geospatial-utils';
 import { getElevation, ElevationData } from '@/lib/elevation';
+import { getCurrentWeather, WeatherData, ForecastData } from '@/lib/weather';
 import { BasemapType } from '@/components/MapView';
 import * as turf from '@turf/turf';
 
@@ -17,9 +19,6 @@ const MapView = dynamic(() => import('@/components/MapView'), {
   loading: () => <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">Loading map...</div>
 });
 
-const ConstructionCostComponent = dynamic(() => import('@/components/ConstructionCost'), {
-  ssr: false
-});
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<Point | null>(null);
@@ -29,6 +28,10 @@ export default function Home() {
   const [earthquakeZone, setEarthquakeZone] = useState<any>(null);
   const [elevation, setElevation] = useState<ElevationData | null>(null);
   const [loadingElevation, setLoadingElevation] = useState(false);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loadingWeather, setLoadingWeather] = useState(false);
+  const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
+  const [assessmentModalData, setAssessmentModalData] = useState<{ location: Point; address: string | null; floodRisk: any; earthquakeZone: any; elevation: ElevationData | null; weather: WeatherData | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState({ step: '', progress: 0 });
   const [error, setError] = useState<string | null>(null);
@@ -116,10 +119,11 @@ export default function Home() {
     };
   }, [selectedLocation, earthquakeZones, floodExtent]);
 
-  // Fetch elevation when location changes
+  // Fetch elevation and weather when location changes
   useEffect(() => {
     if (!selectedLocation) {
       setElevation(null);
+      setWeather(null);
       return;
     }
 
@@ -133,6 +137,18 @@ export default function Home() {
         console.error('Error fetching elevation:', error);
         setElevation(null);
         setLoadingElevation(false);
+      });
+
+    setLoadingWeather(true);
+    getCurrentWeather(selectedLocation)
+      .then((weatherData) => {
+        setWeather(weatherData);
+        setLoadingWeather(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching weather:', error);
+        setWeather(null);
+        setLoadingWeather(false);
       });
   }, [selectedLocation]);
 
@@ -254,18 +270,18 @@ export default function Home() {
     <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
       {/* Left Panel - All content in one scrollable area */}
       {/* Mobile: Overlay panel that slides in. Desktop: Fixed width sidebar */}
-      <div className={`${showPanel ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative inset-y-0 left-0 z-[9999] md:z-auto w-80 md:w-96 bg-white shadow-xl md:shadow-lg overflow-y-auto h-screen flex-shrink-0 transition-transform duration-300 ease-in-out`}>
+      <div className={`${showPanel ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative inset-y-0 left-0 z-[9999] md:z-auto w-80 md:w-96 bg-white shadow-xl md:shadow-lg h-screen flex-shrink-0 transition-transform duration-300 ease-in-out flex flex-col`}>
         {/* Header */}
-        <div className="sticky top-0 z-10 p-3 md:p-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
+        <div className="flex-shrink-0 p-3 md:p-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-3">
               <img 
                 src="/logo.png" 
-                alt="Bendcrete Logo" 
+                alt="NDMA Logo" 
                 className="h-6 w-6 md:h-8 md:w-8 object-contain"
               />
               <div>
-                <h1 className="text-lg md:text-xl font-bold">Bendcrete</h1>
+                <h1 className="text-lg md:text-xl font-bold">NDMA Resilient Construction Platform</h1>
                 <p className="text-xs md:text-sm text-blue-100 mt-0.5 md:mt-1">Construction Site Assessment</p>
               </div>
             </div>
@@ -282,8 +298,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* All Content - Single Scrollable Area */}
-        <div className="p-3 md:p-4 space-y-4 md:space-y-6">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-4 md:space-y-6">
           {/* Risk Assessment */}
           <RiskAssessment
             location={selectedLocation}
@@ -292,35 +308,45 @@ export default function Home() {
             elevation={elevation}
             loadingElevation={loadingElevation}
             calculating={calculatingRisk}
+            weather={weather}
+            onOpenModal={() => {}}
           />
           
-          {/* Weather Display */}
-          {selectedLocation && (
-            <div className="border-t pt-6">
-              <WeatherDisplay location={selectedLocation} />
-            </div>
-          )}
-
-          {/* Construction Cost Section */}
-          {selectedLocation && (
-            <div className="border-t pt-6">
-              <ConstructionCostComponent
-                location={selectedLocation}
-                floodRisk={floodRisk}
-                earthquakeZone={earthquakeZone}
-                elevation={elevation}
-                baseCost={2000}
-              />
-            </div>
-          )}
+       
 
           {/* Footer */}
           <div className="border-t pt-6 pb-4">
             <div className="bg-gray-100 rounded-lg p-4 text-xs text-gray-600 text-center">
-              <p>Bendcrete - Pakistan Construction Assessment</p>
+              <p>NDMA Resilient Construction Platform - Pakistan Construction Assessment</p>
             </div>
           </div>
         </div>
+
+        {/* Fixed Bottom Button */}
+        {selectedLocation && (
+          <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3 md:p-4 shadow-lg">
+            <button
+              onClick={() => {
+                const address = null; // Address will be fetched in modal if needed
+                setAssessmentModalData({ 
+                  location: selectedLocation, 
+                  address: address, 
+                  floodRisk: floodRisk, 
+                  earthquakeZone: earthquakeZone, 
+                  elevation: elevation, 
+                  weather: weather 
+                });
+                setAssessmentModalOpen(true);
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              <span>View Full Site Assessment</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Full Screen Map */}
@@ -380,6 +406,23 @@ export default function Home() {
         )}
 
       </div>
+
+      {/* Assessment Modal - Rendered outside side panel, full screen */}
+      {assessmentModalData && (
+        <AssessmentModal
+          isOpen={assessmentModalOpen}
+          onClose={() => {
+            setAssessmentModalOpen(false);
+            setAssessmentModalData(null);
+          }}
+          location={assessmentModalData.location}
+          address={assessmentModalData.address}
+          floodRisk={assessmentModalData.floodRisk}
+          earthquakeZone={assessmentModalData.earthquakeZone}
+          elevation={assessmentModalData.elevation}
+          weather={assessmentModalData.weather}
+        />
+      )}
     </div>
   );
 }

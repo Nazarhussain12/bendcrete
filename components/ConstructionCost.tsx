@@ -13,14 +13,20 @@ interface ConstructionCostProps {
   earthquakeZone: EarthquakeZoneResult | null;
   elevation: ElevationData | null;
   baseCost: number; // Base construction cost per square foot
+  weather?: WeatherData | null; // Optional: if provided, won't fetch weather
 }
 
-export default function ConstructionCost({ location, floodRisk, earthquakeZone, elevation, baseCost = 2000 }: ConstructionCostProps) {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+export default function ConstructionCost({ location, floodRisk, earthquakeZone, elevation, baseCost = 2000, weather: providedWeather }: ConstructionCostProps) {
+  const [weather, setWeather] = useState<WeatherData | null>(providedWeather || null);
   const [loadingWeather, setLoadingWeather] = useState(false);
 
-  // Fetch weather data when location changes
+  // Fetch weather data when location changes (only if not provided as prop)
   useEffect(() => {
+    if (providedWeather !== undefined) {
+      setWeather(providedWeather);
+      return;
+    }
+
     if (!location) {
       setWeather(null);
       return;
@@ -37,7 +43,7 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
         setWeather(null);
         setLoadingWeather(false);
       });
-  }, [location]);
+  }, [location, providedWeather]);
 
   if (!location) {
     return (

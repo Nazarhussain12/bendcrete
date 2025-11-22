@@ -7,6 +7,7 @@ import { getZoneInfo } from '@/lib/earthquake-zones-info';
 import { reverseGeocode } from '@/lib/geocoding';
 import { ElevationData } from '@/lib/elevation';
 import { Mountain } from 'lucide-react';
+import { WeatherData } from '@/lib/weather';
 
 interface RiskAssessmentProps {
   location: Point | null;
@@ -15,9 +16,11 @@ interface RiskAssessmentProps {
   elevation: ElevationData | null;
   loadingElevation?: boolean;
   calculating?: boolean;
+  weather?: WeatherData | null;
+  onOpenModal: (location: Point, address: string | null, floodRisk: FloodRisk | null, earthquakeZone: EarthquakeZoneResult | null, elevation: ElevationData | null, weather: WeatherData | null) => void;
 }
 
-export default function RiskAssessment({ location, floodRisk, earthquakeZone, elevation, loadingElevation = false, calculating = false }: RiskAssessmentProps) {
+export default function RiskAssessment({ location, floodRisk, earthquakeZone, elevation, loadingElevation = false, calculating = false, weather = null, onOpenModal }: RiskAssessmentProps) {
   const [address, setAddress] = useState<string | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
 
@@ -204,24 +207,6 @@ export default function RiskAssessment({ location, floodRisk, earthquakeZone, el
                 ))}
               </ul>
             </div>
-
-            <div>
-              <p className="font-semibold mb-1">Vulnerability:</p>
-              <ul className="list-disc list-inside text-sm space-y-1 opacity-90">
-                {zoneInfo.vulnerability.map((vuln, idx) => (
-                  <li key={idx}>{vuln}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p className="font-semibold mb-1">Construction Recommendations:</p>
-              <ul className="list-disc list-inside text-sm space-y-1 opacity-90">
-                {zoneInfo.constructionRecommendations.map((rec, idx) => (
-                  <li key={idx}>{rec}</li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       ) : (
@@ -230,29 +215,6 @@ export default function RiskAssessment({ location, floodRisk, earthquakeZone, el
         </div>
       )}
 
-      {/* Overall Suitability - More Prominent */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-5 shadow-md">
-        <h3 className="font-bold text-xl mb-3 text-gray-900">Overall Construction Suitability</h3>
-        {floodRisk && earthquakeZone && zoneInfo ? (
-          <div className="space-y-2">
-            {floodRisk.level === 'High Risk' || zoneInfo.riskLevel === 'Very High' ? (
-              <p className="text-red-700 font-semibold">
-                ⚠️ Not Recommended: High risk location. Consider alternative sites or extensive mitigation measures.
-              </p>
-            ) : floodRisk.level === 'Medium Risk' || zoneInfo.riskLevel === 'High' ? (
-              <p className="text-orange-700 font-semibold">
-                ⚠️ Proceed with Caution: Moderate to high risk. Professional assessment and enhanced construction required.
-              </p>
-            ) : (
-              <p className="text-green-700 font-semibold">
-                ✓ Suitable: Location appears suitable for construction with standard precautions.
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-gray-600">Complete risk assessment data not available</p>
-        )}
-      </div>
     </div>
   );
 }

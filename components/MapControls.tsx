@@ -81,7 +81,7 @@ export default function MapControls({
         const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', Pakistan')}&limit=1`;
         const response = await fetch(nominatimUrl, {
           headers: {
-            'User-Agent': 'BendcreteApp/1.0'
+            'User-Agent': 'NDMAResilientConstructionPlatform/1.0'
           },
           signal: AbortSignal.timeout(5000)
         });

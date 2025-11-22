@@ -23,7 +23,7 @@ export default function LocationInput({ onLocationSelect, onCurrentLocation }: L
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', Pakistan')}&limit=1`,
         {
           headers: {
-            'User-Agent': 'BendcreteApp/1.0'
+            'User-Agent': 'NDMAResilientConstructionPlatform/1.0'
           }
         }
       );

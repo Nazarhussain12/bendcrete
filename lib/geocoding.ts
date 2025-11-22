@@ -131,7 +131,7 @@ async function tryNominatim(point: Point): Promise<string | null> {
       url,
       {
         headers: {
-          'User-Agent': 'BendcreteApp/1.0',
+          'User-Agent': 'NDMAResilientConstructionPlatform/1.0',
           'Accept': 'application/json'
         }
       },

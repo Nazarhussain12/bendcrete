@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bendcrete - Construction Site Assessment Portal",
+  title: "NDMA Resilient Construction Platform",
   description: "Assess construction suitability based on earthquake zones and flood risks in Pakistan",
   icons: {
     icon: '/logo.png',
