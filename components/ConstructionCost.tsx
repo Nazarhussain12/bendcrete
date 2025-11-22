@@ -6,6 +6,7 @@ import { Point, FloodRisk, EarthquakeZoneResult } from '@/lib/geospatial-utils';
 import { getZoneInfo } from '@/lib/earthquake-zones-info';
 import { ElevationData } from '@/lib/elevation';
 import { getCurrentWeather, WeatherData } from '@/lib/weather';
+import { getClimateData, ClimateData, getClimateCostMultiplier } from '@/lib/climate';
 
 interface ConstructionCostProps {
   location: Point | null;
@@ -19,6 +20,8 @@ interface ConstructionCostProps {
 export default function ConstructionCost({ location, floodRisk, earthquakeZone, elevation, baseCost = 2000, weather: providedWeather }: ConstructionCostProps) {
   const [weather, setWeather] = useState<WeatherData | null>(providedWeather || null);
   const [loadingWeather, setLoadingWeather] = useState(false);
+  const [climate, setClimate] = useState<ClimateData | null>(null);
+  const [loadingClimate, setLoadingClimate] = useState(false);
 
   // Fetch weather data when location changes (only if not provided as prop)
   useEffect(() => {
@@ -44,6 +47,26 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
         setLoadingWeather(false);
       });
   }, [location, providedWeather]);
+
+  // Fetch climate data (long-term averages) when location changes
+  useEffect(() => {
+    if (!location) {
+      setClimate(null);
+      return;
+    }
+
+    setLoadingClimate(true);
+    getClimateData(location)
+      .then((climateData) => {
+        setClimate(climateData);
+        setLoadingClimate(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching climate data:', error);
+        setClimate(null);
+        setLoadingClimate(false);
+      });
+  }, [location]);
 
   if (!location) {
     return (
@@ -72,10 +95,13 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
     }
   }
   
-  // Weather multiplier: Extreme weather conditions add costs
-  // High humidity, extreme temperatures, high wind speeds increase construction costs
+  // Climate multiplier: Use long-term climate averages instead of current weather
+  // This provides more stable and representative cost estimates
+  const climateMultiplier = getClimateCostMultiplier(climate);
+  
+  // Fallback to weather multiplier if climate data is not available
   let weatherMultiplier = 1.0;
-  if (weather) {
+  if (!climate && weather) {
     // High humidity (>80%) adds 3% for moisture protection
     if (weather.humidity > 80) {
       weatherMultiplier += 0.03;
@@ -94,14 +120,17 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
     }
   }
   
-  const totalMultiplier = earthquakeMultiplier * floodMultiplier * elevationMultiplier * weatherMultiplier;
+  // Use climate multiplier if available, otherwise use weather multiplier
+  const environmentalMultiplier = climate ? climateMultiplier : weatherMultiplier;
+  
+  const totalMultiplier = earthquakeMultiplier * floodMultiplier * elevationMultiplier * environmentalMultiplier;
   
   // Cost breakdown
   const baseCostPerSqft = baseCost;
   const earthquakeCost = baseCostPerSqft * (earthquakeMultiplier - 1);
   const floodCost = baseCostPerSqft * (floodMultiplier - 1);
   const elevationCost = baseCostPerSqft * (elevationMultiplier - 1);
-  const weatherCost = baseCostPerSqft * (weatherMultiplier - 1);
+  const environmentalCost = baseCostPerSqft * (environmentalMultiplier - 1);
   const adjustedCostPerSqft = baseCostPerSqft * totalMultiplier;
   
   // Example for 1000 sqft house
@@ -116,7 +145,7 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
     { name: 'Earthquake Mitigation', value: earthquakeCost * houseSize, color: '#f59e0b' },
     { name: 'Flood Protection', value: floodCost * houseSize, color: '#10b981' },
     { name: 'Elevation Factors', value: elevationCost * houseSize, color: '#8b5cf6' },
-    { name: 'Weather Adaptation', value: weatherCost * houseSize, color: '#ec4899' }
+    { name: climate ? 'Climate Adaptation' : 'Weather Adaptation', value: environmentalCost * houseSize, color: '#ec4899' }
   ].filter(item => item.value > 0);
 
   const multiplierData = [
@@ -137,8 +166,8 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
       cost: baseCostPerSqft * earthquakeMultiplier * floodMultiplier * elevationMultiplier
     },
     { 
-      factor: 'Weather', 
-      multiplier: weatherMultiplier, 
+      factor: climate ? 'Climate' : 'Weather', 
+      multiplier: environmentalMultiplier, 
       cost: baseCostPerSqft * totalMultiplier
     },
   ];
@@ -265,8 +294,8 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
         </div>
       </div>
 
-      {/* Elevation & Weather Info */}
-      {(elevation || weather) && (
+      {/* Elevation & Climate/Weather Info */}
+      {(elevation || climate || weather) && (
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
           <h3 className="text-xs font-semibold mb-2 text-purple-700">Site Conditions:</h3>
           <div className="space-y-1 text-xs text-purple-600">
@@ -275,15 +304,31 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
                 {elevationMultiplier > 1.0 && ` (${((elevationMultiplier - 1) * 100).toFixed(0)}% cost increase)`}
               </p>
             )}
-            {loadingWeather && (
+            {loadingClimate && (
+              <p>🌍 Loading climate data...</p>
+            )}
+            {climate && (
+              <div className="space-y-1">
+                <p className="font-semibold">🌍 Climate (Long-term Averages):</p>
+                <p>Temp: {climate.temperature2mMean.toFixed(1)}°C (Max: {climate.temperature2mMax.toFixed(1)}°C, Min: {climate.temperature2mMin.toFixed(1)}°C)</p>
+                <p>Precipitation: {climate.precipitationSum.toFixed(1)} mm/day | Humidity: {climate.relativehumidity2mMean.toFixed(0)}% | Wind: {climate.windspeed10mMean.toFixed(1)} km/h</p>
+                <p className="text-purple-700">Zone: {climate.climateZone}</p>
+                {environmentalMultiplier > 1.0 && (
+                  <p className="text-purple-700 font-medium">
+                    Climate conditions add {((environmentalMultiplier - 1) * 100).toFixed(1)}% to construction costs
+                  </p>
+                )}
+              </div>
+            )}
+            {!climate && loadingWeather && (
               <p>🌤️ Loading weather data...</p>
             )}
-            {weather && (
+            {!climate && weather && (
               <div className="space-y-1">
-                <p>🌤️ Weather: {weather.temperature}°C, {weather.humidity}% humidity, {typeof weather.windSpeed === 'number' ? weather.windSpeed.toFixed(0) : weather.windSpeed} km/h wind</p>
-                {weatherMultiplier > 1.0 && (
+                <p>🌤️ Current Weather: {weather.temperature}°C, {weather.humidity}% humidity, {typeof weather.windSpeed === 'number' ? weather.windSpeed.toFixed(0) : weather.windSpeed} km/h wind</p>
+                {environmentalMultiplier > 1.0 && (
                   <p className="text-purple-700 font-medium">
-                    Weather conditions add {((weatherMultiplier - 1) * 100).toFixed(1)}% to construction costs
+                    Weather conditions add {((environmentalMultiplier - 1) * 100).toFixed(1)}% to construction costs
                   </p>
                 )}
               </div>

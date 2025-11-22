@@ -206,22 +206,35 @@ export default function Home() {
         },
         (error) => {
           let errorMessage = 'Unable to get your location. ';
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
+          // Geolocation error codes: 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
+          const errorCode = error?.code;
+          
+          switch (errorCode) {
+            case 1: // PERMISSION_DENIED
               errorMessage += 'Location access was denied. Please allow location access in your browser settings.';
               break;
-            case error.POSITION_UNAVAILABLE:
+            case 2: // POSITION_UNAVAILABLE
               errorMessage += 'Location information is unavailable. Please try again or select manually.';
               break;
-            case error.TIMEOUT:
+            case 3: // TIMEOUT
               errorMessage += 'Location request timed out. Please try again or select manually.';
               break;
             default:
               errorMessage += 'An unknown error occurred. Please select your location manually.';
               break;
           }
+          
+          // Log error details for debugging (avoid logging empty objects)
+          const errorDetails = {
+            code: errorCode,
+            message: error?.message || 'Unknown error',
+            timestamp: new Date().toISOString()
+          };
+          
+          console.error('Geolocation error:', errorDetails);
+          
+          // Show alert with user-friendly message
           alert(errorMessage);
-          console.error('Geolocation error:', error);
         },
         options
       );

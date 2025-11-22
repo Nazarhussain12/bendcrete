@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import { Point } from '@/lib/geospatial-utils';
 import { reverseGeocode } from '@/lib/geocoding';
 import WeatherPopup from './WeatherPopup';
+import * as turf from '@turf/turf';
 
 // Fix for default marker icons in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -36,6 +37,121 @@ function MapController({ center, zoom }: { center: [number, number]; zoom: numbe
   useEffect(() => {
     map.setView(center, zoom);
   }, [map, center, zoom]);
+  return null;
+}
+
+// Component to render zone labels dynamically based on zoom
+function ZoneLabels({ earthquakeZones, layerVisibility }: { earthquakeZones: any; layerVisibility: { earthquakeZones: boolean } }) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+  const [labels, setLabels] = useState<L.Marker[]>([]);
+
+  useEffect(() => {
+    const updateZoom = () => {
+      setZoom(map.getZoom());
+    };
+    map.on('zoomend', updateZoom);
+    return () => {
+      map.off('zoomend', updateZoom);
+    };
+  }, [map]);
+
+  useEffect(() => {
+    // Clear existing labels
+    labels.forEach(label => {
+      map.removeLayer(label);
+    });
+
+    if (!earthquakeZones || !layerVisibility.earthquakeZones) {
+      setLabels([]);
+      return;
+    }
+
+    const newLabels: L.Marker[] = [];
+    const features = earthquakeZones.features || [];
+
+    features.forEach((feature: any) => {
+      try {
+        const zone = feature?.properties?.PGA || 'Unknown';
+        if (!zone || zone === 'Unknown') return;
+
+        // Calculate centroid of the polygon using Turf.js
+        const centroid = turf.centroid(feature);
+        // Turf.js returns coordinates as [lng, lat] (GeoJSON format)
+        const [lng, lat] = centroid.geometry.coordinates;
+
+        // Calculate font size based on zoom level
+        // Zoom 5-7: small (10px), 8-10: medium (14px), 11-13: large (18px), 14+: extra large (22px)
+        let fontSize = 10;
+        if (zoom >= 14) {
+          fontSize = 22;
+        } else if (zoom >= 11) {
+          fontSize = 18;
+        } else if (zoom >= 8) {
+          fontSize = 14;
+        } else {
+          fontSize = 10;
+        }
+
+        // Only show labels at zoom level 5 and above
+        if (zoom < 5) return;
+
+        // Estimate text width based on zone name length and font size
+        const textWidth = zone.length * fontSize * 0.6; // Approximate width
+        const textHeight = fontSize * 1.2; // Approximate height
+
+        // Create custom icon with text label, properly centered
+        const labelIcon = L.divIcon({
+          className: 'zone-label',
+          html: `<div style="
+            font-size: ${fontSize}px;
+            font-weight: bold;
+            color: #1f2937;
+            text-shadow: 
+              -1px -1px 0 #fff,
+              1px -1px 0 #fff,
+              -1px 1px 0 #fff,
+              1px 1px 0 #fff,
+              0 0 2px #fff;
+            text-align: center;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: Arial, sans-serif;
+            line-height: ${textHeight}px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: ${textWidth}px;
+            height: ${textHeight}px;
+          ">${zone}</div>`,
+          iconSize: [textWidth, textHeight],
+          iconAnchor: [textWidth / 2, textHeight / 2], // Center the anchor point
+        });
+
+        // Leaflet marker expects [lat, lng] format
+        const marker = L.marker([lat, lng], {
+          icon: labelIcon,
+          interactive: false,
+          zIndexOffset: 1000,
+        });
+
+        marker.addTo(map);
+        newLabels.push(marker);
+      } catch (error) {
+        // Skip features that can't be processed
+        console.warn('Error processing zone label:', error);
+      }
+    });
+
+    setLabels(newLabels);
+
+    return () => {
+      newLabels.forEach(label => {
+        map.removeLayer(label);
+      });
+    };
+  }, [map, earthquakeZones, layerVisibility.earthquakeZones, zoom]);
+
   return null;
 }
 
@@ -280,35 +396,38 @@ export default function MapView({
         
         {/* Earthquake Zones Layer - if visible (render first, so flood is on top) */}
         {earthquakeZones && layerVisibility.earthquakeZones && (
-          <GeoJSON
-            data={earthquakeZones}
-            style={getEarthquakeZoneStyle}
-            onEachFeature={(feature, layer) => {
-              const zone = feature?.properties?.PGA || 'Unknown';
-              layer.bindPopup(`Earthquake Zone: ${zone}`);
-              
-              // Remove any existing click handlers
-              layer.off('click');
-              
-              // Use ref to always get current clickMode value
-              layer.on('click', (e) => {
-                if (clickModeRef.current) {
-                  // When click mode is ON: select location immediately
-                  onLocationSelectRef.current({
-                    lat: e.latlng.lat,
-                    lng: e.latlng.lng
-                  });
-                  // Also show layer popup after a delay
-                  setTimeout(() => {
-                    layer.openPopup(e.latlng);
-                  }, 300);
-                } else {
-                  // When click mode is OFF: stop propagation, only show layer popup
-                  e.originalEvent.stopPropagation();
-                }
-              });
-            }}
-          />
+          <>
+            <GeoJSON
+              data={earthquakeZones}
+              style={getEarthquakeZoneStyle}
+              onEachFeature={(feature, layer) => {
+                const zone = feature?.properties?.PGA || 'Unknown';
+                layer.bindPopup(`Earthquake Zone: ${zone}`);
+                
+                // Remove any existing click handlers
+                layer.off('click');
+                
+                // Use ref to always get current clickMode value
+                layer.on('click', (e) => {
+                  if (clickModeRef.current) {
+                    // When click mode is ON: select location immediately
+                    onLocationSelectRef.current({
+                      lat: e.latlng.lat,
+                      lng: e.latlng.lng
+                    });
+                    // Also show layer popup after a delay
+                    setTimeout(() => {
+                      layer.openPopup(e.latlng);
+                    }, 300);
+                  } else {
+                    // When click mode is OFF: stop propagation, only show layer popup
+                    e.originalEvent.stopPropagation();
+                  }
+                });
+              }}
+            />
+            <ZoneLabels earthquakeZones={earthquakeZones} layerVisibility={layerVisibility} />
+          </>
         )}
 
         {/* Flood Extent Layer - if visible (render last, so it's on top) */}
