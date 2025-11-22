@@ -462,7 +462,7 @@ function ConstructionTypeDetailView({ type, onBack }: { type: string; onBack: ()
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
         <h4 className="text-lg md:text-xl font-bold text-gray-900 mb-4">Step-by-Step Construction Procedure</h4>
         <div className="text-gray-600">
-          <p className="mb-4">The</p>
+         
           <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
             
           </div>
