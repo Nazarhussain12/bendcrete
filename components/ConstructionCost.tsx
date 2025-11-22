@@ -276,17 +276,17 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b">
-                <th className="text-left p-1.5">Factor</th>
-                <th className="text-right p-1.5">Multiplier</th>
-                <th className="text-right p-1.5">Cost/sqft</th>
+                <th className="text-left p-1.5 text-gray-900 font-semibold">Factor</th>
+                <th className="text-right p-1.5 text-gray-900 font-semibold">Multiplier</th>
+                <th className="text-right p-1.5 text-gray-900 font-semibold">Cost/sqft</th>
               </tr>
             </thead>
             <tbody>
               {multiplierData.map((row, idx) => (
                 <tr key={idx} className="border-b">
-                  <td className="p-1.5 text-gray-700">{row.factor}</td>
-                  <td className="text-right p-1.5">{row.multiplier.toFixed(2)}x</td>
-                  <td className="text-right p-1.5">Rs. {row.cost.toLocaleString()}</td>
+                  <td className="p-1.5 text-gray-900">{row.factor}</td>
+                  <td className="text-right p-1.5 text-gray-900">{row.multiplier.toFixed(2)}x</td>
+                  <td className="text-right p-1.5 text-gray-900">Rs. {row.cost.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -339,8 +339,8 @@ export default function ConstructionCost({ location, floodRisk, earthquakeZone, 
 
       {/* Cost Notes */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-        <h3 className="text-xs font-semibold mb-2 text-gray-700">Notes:</h3>
-        <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+        <h3 className="text-xs font-semibold mb-2 text-gray-900">Notes:</h3>
+        <ul className="text-xs text-gray-800 space-y-1 list-disc list-inside">
           <li>Base cost assumes standard construction</li>
           <li>Earthquake mitigation: seismic reinforcement & foundation</li>
           <li>Flood protection: elevated foundations & waterproofing</li>

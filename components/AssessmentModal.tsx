@@ -552,7 +552,7 @@ function WorkingConditionsView({
       {/* Weather Information Header */}
       <div className="mb-4">
         <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-1">Today's Working Conditions</h3>
-        <p className="text-base md:text-lg text-gray-600">{address || weather.location || 'Location'}</p>
+        <p className="text-base md:text-lg text-gray-800">{address || weather.location || 'Location'}</p>
       </div>
 
       {/* Climate Data Section - Long-term Averages */}
@@ -565,27 +565,27 @@ function WorkingConditionsView({
           <p className="text-xs md:text-sm text-green-700 mb-3 italic">These are historical climate averages, not today's weather</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
             <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-600 mb-1">Avg Temperature</div>
+              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Avg Temperature</div>
               <div className="text-xs md:text-sm font-semibold text-green-900">{climate.temperature2mMean.toFixed(1)}°C</div>
             </div>
             <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-600 mb-1">Max Temperature</div>
+              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Max Temperature</div>
               <div className="text-xs md:text-sm font-semibold text-green-900">{climate.temperature2mMax.toFixed(1)}°C</div>
             </div>
             <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-600 mb-1">Min Temperature</div>
+              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Min Temperature</div>
               <div className="text-xs md:text-sm font-semibold text-green-900">{climate.temperature2mMin.toFixed(1)}°C</div>
             </div>
             <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-600 mb-1">Precipitation</div>
+              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Precipitation</div>
               <div className="text-xs md:text-sm font-semibold text-green-900">{climate.precipitationSum.toFixed(1)} mm/day</div>
             </div>
             <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-600 mb-1">Wind Speed</div>
+              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Wind Speed</div>
               <div className="text-xs md:text-sm font-semibold text-green-900">{climate.windspeed10mMean.toFixed(1)} km/h</div>
             </div>
             <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-600 mb-1">Climate Zone</div>
+              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Climate Zone</div>
               <div className="text-xs md:text-sm font-semibold text-green-900">{climate.climateZone || 'N/A'}</div>
             </div>
           </div>
@@ -612,8 +612,8 @@ function WorkingConditionsView({
             />
             <div>
               <div className="text-3xl md:text-4xl font-bold text-gray-900">{weather.temperature}°C</div>
-              <div className="text-base md:text-lg text-gray-600 capitalize">{weather.description}</div>
-              <div className="text-sm text-gray-500">Feels like {weather.feelsLike}°C</div>
+              <div className="text-base md:text-lg text-gray-800 capitalize">{weather.description}</div>
+              <div className="text-sm text-gray-900">Feels like {weather.feelsLike}°C</div>
             </div>
           </div>
         </div>
@@ -623,43 +623,43 @@ function WorkingConditionsView({
           <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
             <Droplet className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] md:text-xs text-gray-600">Humidity</div>
-              <div className="text-xs md:text-sm font-semibold">{weather.humidity}%</div>
+              <div className="text-[10px] md:text-xs text-gray-800">Humidity</div>
+              <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.humidity}%</div>
             </div>
           </div>
           <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
             <Wind className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] md:text-xs text-gray-600">Wind Speed</div>
-              <div className="text-xs md:text-sm font-semibold">{weather.windSpeed} km/h</div>
+              <div className="text-[10px] md:text-xs text-gray-800">Wind Speed</div>
+              <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.windSpeed} km/h</div>
             </div>
           </div>
           <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
             <Gauge className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] md:text-xs text-gray-600">Pressure</div>
-              <div className="text-xs md:text-sm font-semibold">{weather.pressure} hPa</div>
+              <div className="text-[10px] md:text-xs text-gray-800">Pressure</div>
+              <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.pressure} hPa</div>
             </div>
           </div>
           <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
             <Eye className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] md:text-xs text-gray-600">Visibility</div>
-              <div className="text-xs md:text-sm font-semibold">{weather.visibility} km</div>
+              <div className="text-[10px] md:text-xs text-gray-800">Visibility</div>
+              <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.visibility} km</div>
             </div>
           </div>
           <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
             <Cloud className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] md:text-xs text-gray-600">Cloud Cover</div>
-              <div className="text-xs md:text-sm font-semibold">{weather.cloudCover}%</div>
+              <div className="text-[10px] md:text-xs text-gray-800">Cloud Cover</div>
+              <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.cloudCover}%</div>
             </div>
           </div>
           <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
             <Sun className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] md:text-xs text-gray-600">Wind Dir</div>
-              <div className="text-xs md:text-sm font-semibold">{weather.windDirection}°</div>
+              <div className="text-[10px] md:text-xs text-gray-800">Wind Dir</div>
+              <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.windDirection}°</div>
             </div>
           </div>
         </div>
@@ -680,12 +680,12 @@ function WorkingConditionsView({
                   />
                   <div className="min-w-0">
                     <div className="font-medium text-xs md:text-sm">{day.date}</div>
-                    <div className="text-[10px] md:text-xs text-gray-600 capitalize truncate">{day.description}</div>
+                    <div className="text-[10px] md:text-xs text-gray-800 capitalize truncate">{day.description}</div>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="font-semibold text-xs md:text-sm">{day.temperature}°C</div>
-                  <div className="text-[10px] md:text-xs text-gray-500">
+                  <div className="font-semibold text-xs md:text-sm text-gray-900">{day.temperature}°C</div>
+                  <div className="text-[10px] md:text-xs text-gray-900">
                     {day.minTemp}° / {day.maxTemp}°
                   </div>
                 </div>

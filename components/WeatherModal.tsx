@@ -106,8 +106,8 @@ export default function WeatherModal({
                 />
                 <div>
                   <div className="text-3xl md:text-4xl font-bold text-gray-900">{weather.temperature}°C</div>
-                  <div className="text-base md:text-lg text-gray-600 capitalize">{weather.description}</div>
-                  <div className="text-sm text-gray-500">Feels like {weather.feelsLike}°C</div>
+                  <div className="text-base md:text-lg text-gray-800 capitalize">{weather.description}</div>
+                  <div className="text-sm text-gray-900">Feels like {weather.feelsLike}°C</div>
                 </div>
               </div>
             </div>
@@ -117,43 +117,43 @@ export default function WeatherModal({
               <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
                 <Droplet className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs text-gray-600">Humidity</div>
-                  <div className="text-xs md:text-sm font-semibold">{weather.humidity}%</div>
+                  <div className="text-[10px] md:text-xs text-gray-800">Humidity</div>
+                  <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.humidity}%</div>
                 </div>
               </div>
               <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
                 <Wind className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs text-gray-600">Wind Speed</div>
-                  <div className="text-xs md:text-sm font-semibold">{weather.windSpeed} km/h</div>
+                  <div className="text-[10px] md:text-xs text-gray-800">Wind Speed</div>
+                  <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.windSpeed} km/h</div>
                 </div>
               </div>
               <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
                 <Gauge className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs text-gray-600">Pressure</div>
-                  <div className="text-xs md:text-sm font-semibold">{weather.pressure} hPa</div>
+                  <div className="text-[10px] md:text-xs text-gray-800">Pressure</div>
+                  <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.pressure} hPa</div>
                 </div>
               </div>
               <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
                 <Eye className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs text-gray-600">Visibility</div>
-                  <div className="text-xs md:text-sm font-semibold">{weather.visibility} km</div>
+                  <div className="text-[10px] md:text-xs text-gray-800">Visibility</div>
+                  <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.visibility} km</div>
                 </div>
               </div>
               <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
                 <Cloud className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs text-gray-600">Cloud Cover</div>
-                  <div className="text-xs md:text-sm font-semibold">{weather.cloudCover}%</div>
+                  <div className="text-[10px] md:text-xs text-gray-800">Cloud Cover</div>
+                  <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.cloudCover}%</div>
                 </div>
               </div>
               <div className="bg-white/70 rounded-lg p-2.5 md:p-3 flex items-center gap-2 shadow-sm">
                 <Sun className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs text-gray-600">Wind Dir</div>
-                  <div className="text-xs md:text-sm font-semibold">{weather.windDirection}°</div>
+                  <div className="text-[10px] md:text-xs text-gray-800">Wind Dir</div>
+                  <div className="text-xs md:text-sm font-semibold text-gray-900">{weather.windDirection}°</div>
                 </div>
               </div>
             </div>
@@ -173,13 +173,13 @@ export default function WeatherModal({
                         className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0"
                       />
                       <div className="min-w-0">
-                        <div className="font-medium text-xs md:text-sm">{day.date}</div>
-                        <div className="text-[10px] md:text-xs text-gray-600 capitalize truncate">{day.description}</div>
+                        <div className="font-medium text-xs md:text-sm text-gray-900">{day.date}</div>
+                        <div className="text-[10px] md:text-xs text-gray-800 capitalize truncate">{day.description}</div>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="font-semibold text-xs md:text-sm">{day.temperature}°C</div>
-                      <div className="text-[10px] md:text-xs text-gray-500">
+                      <div className="font-semibold text-xs md:text-sm text-gray-900">{day.temperature}°C</div>
+                      <div className="text-[10px] md:text-xs text-gray-900">
                         {day.minTemp}° / {day.maxTemp}°
                       </div>
                     </div>
