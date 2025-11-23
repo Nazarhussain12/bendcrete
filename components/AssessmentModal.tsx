@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { X, AlertTriangle, CheckCircle, AlertCircle, Info, Snowflake, Droplet, Building2, Calculator, Wrench, Cone, ArrowLeft, Maximize2, Minimize2, Cloud, Wind, Gauge, Eye, Thermometer, Sun } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle, AlertCircle, Info, Snowflake, Droplet, Building2, Calculator, Wrench, Cone, ArrowLeft, Maximize2, Minimize2, Cloud, Wind, Gauge, Eye, Thermometer, Sun, FileText } from 'lucide-react';
 import { Point, FloodRisk, EarthquakeZoneResult } from '@/lib/geospatial-utils';
 import { getZoneInfo } from '@/lib/earthquake-zones-info';
 import { ElevationData } from '@/lib/elevation';
@@ -185,7 +185,9 @@ export default function AssessmentModal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className={`flex-1 flex flex-col ${
+          currentView === 'newConstruction' ? 'overflow-hidden' : 'overflow-y-auto p-4 md:p-6'
+        }`}>
           {currentView === 'newConstruction' ? (
             <NewConstructionView 
               selectedConstructionType={selectedConstructionType}
@@ -260,9 +262,75 @@ function NewConstructionView({
   onConstructionTypeSelect: (type: string) => void;
   onBack: () => void;
 }) {
+  const [selectedPdf, setSelectedPdf] = useState<{ title: string; url: string } | null>(null);
+
+  // PDF data
+  const buildingCodes = [
+    {
+      title: 'Building Code of Pakistan BCP 2021',
+      url: 'https://www.pec.org.pk/wp-content/uploads/2024/09/BCP2021-Final-Draft-dated-26.10.2021.pdf',
+      image: '/new-construction-1.jpg'
+    },
+    {
+      title: 'ACI 318-19 Building Code Requirements',
+      url: 'https://www.concrete.org/Portals/0/Files/PDF/Previews/318-19_preview.pdf',
+      image: '/new-construction-2.png'
+    },
+    {
+      title: 'ASCE 7-16 Minimum Design Loads',
+      url: 'https://behsazcivil.ir/wp-content/uploads/2021/12/ASCE_7_22_Minimum_Design_Loads_and_Associated_Criteria_for_Buildings_compressed_compressed333.pdf',
+      image: '/new-construction-3.png'
+    }
+  ];
+
   // If a construction type is selected, show detailed view
   if (selectedConstructionType) {
     return <ConstructionTypeDetailView type={selectedConstructionType} onBack={onBack} />;
+  }
+
+  // If a PDF is selected, show PDF viewer
+  if (selectedPdf) {
+    return (
+      <div className="h-full w-full flex flex-col">
+        {/* PDF Viewer Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 md:p-6 pb-3 flex-shrink-0 bg-white border-b border-gray-200">
+          <button
+            onClick={() => setSelectedPdf(null)}
+            className="flex items-center gap-2 text-blue-700 hover:text-blue-900 font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm md:text-base">Back to Building Codes</span>
+          </button>
+          <button
+            onClick={() => window.open(selectedPdf.url, '_blank')}
+            className="flex items-center gap-2 text-blue-700 hover:text-blue-900 font-medium text-sm md:text-base"
+          >
+            <FileText className="w-4 h-4 md:w-5 md:h-5" />
+            <span>Open in New Tab</span>
+          </button>
+        </div>
+
+        {/* PDF Title */}
+        <div className="px-4 md:px-6 py-2 flex-shrink-0 bg-white border-b border-gray-200">
+          <h3 className="text-lg md:text-xl font-bold text-gray-900">{selectedPdf.title}</h3>
+        </div>
+
+        {/* PDF Viewer - Takes full remaining height */}
+        <div className="flex-1 overflow-hidden bg-gray-100 min-h-0">
+          <iframe
+            src={`${selectedPdf.url}#toolbar=1&navpanes=1&scrollbar=1`}
+            className="w-full h-full"
+            title={selectedPdf.title}
+            style={{ border: 'none' }}
+          />
+        </div>
+        
+        {/* Helpful note */}
+        <div className="bg-blue-50 border-t border-blue-200 p-2 text-xs text-blue-700 text-center flex-shrink-0">
+          <p>If the PDF doesn't load, use "Open in New Tab" button above</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -290,41 +358,22 @@ function NewConstructionView({
       <div className="mb-6">
         <h4 className="text-lg font-semibold text-gray-900 mb-4">Building Codes References</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* BCP 2021 */}
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow">
-            <div className="aspect-[3/4] rounded-lg mb-4 overflow-hidden">
-              <img 
-                src="/new-construction-1.jpg" 
-                alt="Building Code of Pakistan BCP 2021"
-                className="w-full h-full object-cover"
-              />
+          {buildingCodes.map((code, index) => (
+            <div
+              key={index}
+              onClick={() => setSelectedPdf({ title: code.title, url: code.url })}
+              className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02]"
+            >
+              <div className="aspect-[3/4] rounded-lg mb-4 overflow-hidden">
+                <img 
+                  src={code.image} 
+                  alt={code.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="text-sm font-semibold text-gray-800 text-center">{code.title}</p>
             </div>
-            <p className="text-sm font-semibold text-gray-800 text-center">Building Code of Pakistan BCP 2021</p>
-          </div>
-
-          {/* ACI 318-19 */}
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow">
-            <div className="aspect-[3/4] rounded-lg mb-4 overflow-hidden">
-              <img 
-                src="/new-construction-2.png" 
-                alt="ACI 318-19 Building Code Requirements"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="text-sm font-semibold text-gray-800 text-center">ACI 318-19 Building Code Requirements</p>
-          </div>
-
-          {/* ASCE 7-16 */}
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow">
-            <div className="aspect-[3/4] rounded-lg mb-4 overflow-hidden">
-              <img 
-                src="/new-construction-3.png" 
-                alt="ASCE 7-16 Minimum Design Loads"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="text-sm font-semibold text-gray-800 text-center">ASCE 7-16 Minimum Design Loads</p>
-          </div>
+          ))}
         </div>
       </div>
 
