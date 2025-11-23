@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { X, AlertTriangle, CheckCircle, AlertCircle, Info, Snowflake, Droplet, Building2, Calculator, Wrench, Cone, ArrowLeft, Maximize2, Minimize2, Cloud, Wind, Gauge, Eye, Thermometer, Sun, FileText } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle, AlertCircle, Info, Snowflake, Droplet, Building2, Calculator, Wrench, Cone, ArrowLeft, Maximize2, Minimize2, Cloud, Wind, Gauge, Eye, Thermometer, Sun, FileText, Hammer, Layers, Shield, Zap, Anchor, Ruler, HardHat, Settings } from 'lucide-react';
 import { Point, FloodRisk, EarthquakeZoneResult } from '@/lib/geospatial-utils';
 import { getZoneInfo } from '@/lib/earthquake-zones-info';
 import { ElevationData } from '@/lib/elevation';
@@ -285,7 +285,10 @@ function NewConstructionView({
 
   // If a construction type is selected, show detailed view
   if (selectedConstructionType) {
-    return <ConstructionTypeDetailView type={selectedConstructionType} onBack={onBack} />;
+    return <ConstructionTypeDetailView 
+      type={selectedConstructionType} 
+      onBack={() => onConstructionTypeSelect(null)} 
+    />;
   }
 
   // If a PDF is selected, show PDF viewer
@@ -469,45 +472,383 @@ function ConstructionTypeDetailView({ type, onBack }: { type: string; onBack: ()
     rcc: {
       title: 'RCC Construction',
       image: '/RCC.png',
-      description: 'Reinforced Cement Concrete (RCC) construction is a composite material made of concrete and steel reinforcement.'
+      description: 'Reinforced Cement Concrete (RCC) construction is a composite material made of concrete and steel reinforcement.',
+      steps: [
+        {
+          number: 1,
+          title: 'Site Preparation & Survey',
+          icon: <Ruler className="w-6 h-6" />,
+          details: [
+            'Conduct detailed site survey and soil investigation',
+            'Mark building layout as per approved drawings',
+            'Clear site of vegetation and debris',
+            'Establish temporary facilities (site office, storage)',
+            'Set up safety barriers and signage'
+          ],
+          codeRef: 'BCP 2021 Section 1803, ACI 318-19'
+        },
+        {
+          number: 2,
+          title: 'Excavation & Foundation',
+          icon: <Anchor className="w-6 h-6" />,
+          details: [
+            'Excavate to required depth as per structural design',
+            'Prepare foundation bed and compact soil',
+            'Install reinforcement bars as per design (minimum cover: 75mm)',
+            'Pour foundation concrete (M20 or higher grade)',
+            'Cure foundation for minimum 7 days',
+            'Check foundation level and dimensions'
+          ],
+          codeRef: 'BCP 2021 Section 1805, ACI 318-19 Chapter 13'
+        },
+        {
+          number: 3,
+          title: 'Column Construction',
+          icon: <Building2 className="w-6 h-6" />,
+          details: [
+            'Erect column formwork (check plumb and alignment)',
+            'Install vertical reinforcement with proper lap length',
+            'Install ties/stirrups at specified spacing',
+            'Pour column concrete in continuous operation',
+            'Vibrate concrete to remove air bubbles',
+            'Cure columns for 14 days minimum'
+          ],
+          codeRef: 'BCP 2021 Section 1810, ACI 318-19 Chapter 10'
+        },
+        {
+          number: 4,
+          title: 'Beam Construction',
+          icon: <Layers className="w-6 h-6" />,
+          details: [
+            'Erect beam formwork with proper supports',
+            'Install bottom reinforcement, top reinforcement, and stirrups',
+            'Ensure proper concrete cover (minimum 40mm)',
+            'Pour beam concrete and vibrate properly',
+            'Maintain formwork for 7 days minimum',
+            'Remove formwork only after achieving design strength'
+          ],
+          codeRef: 'BCP 2021 Section 1810, ACI 318-19 Chapter 9'
+        },
+        {
+          number: 5,
+          title: 'Slab Construction',
+          icon: <Layers className="w-6 h-6" />,
+          details: [
+            'Erect slab formwork with proper shoring',
+            'Install reinforcement mesh as per design',
+            'Provide proper cover blocks (minimum 20mm)',
+            'Pour concrete and level using screed',
+            'Cure slab continuously for 14 days',
+            'Check slab level and surface finish'
+          ],
+          codeRef: 'BCP 2021 Section 1905, ACI 318-19 Chapter 7'
+        },
+        {
+          number: 6,
+          title: 'Quality Control & Testing',
+          icon: <CheckCircle className="w-6 h-6" />,
+          details: [
+            'Test concrete cubes for compressive strength (7, 14, 28 days)',
+            'Check reinforcement placement and cover',
+            'Verify dimensions and alignment',
+            'Conduct non-destructive testing if required',
+            'Maintain quality records and documentation'
+          ],
+          codeRef: 'BCP 2021 Section 1905, ACI 318-19 Chapter 26'
+        }
+      ]
     },
     brick: {
       title: 'Brick Masonry Construction',
       image: '/Brick-masonry.png',
-      description: 'Brick masonry construction uses bricks and mortar to create durable and fire-resistant structures.'
+      description: 'Brick masonry construction uses bricks and mortar to create durable and fire-resistant structures.',
+      steps: [
+        {
+          number: 1,
+          title: 'Site Preparation & Foundation',
+          icon: <Ruler className="w-6 h-6" />,
+          details: [
+            'Mark building layout and foundation lines',
+            'Excavate foundation trench (minimum 1.5m depth)',
+            'Prepare foundation with PCC (Plain Cement Concrete)',
+            'Construct foundation masonry with proper width',
+            'Install DPC (Damp Proof Course) at plinth level'
+          ],
+          codeRef: 'BCP 2021 Section 2103, ASCE 7-16'
+        },
+        {
+          number: 2,
+          title: 'Material Selection & Preparation',
+          icon: <Settings className="w-6 h-6" />,
+          details: [
+            'Use first-class bricks (minimum compressive strength: 10 N/mm²)',
+            'Prepare mortar mix (1:4 or 1:6 cement-sand ratio)',
+            'Soak bricks in water for 2-4 hours before use',
+            'Check brick quality (size, shape, strength)',
+            'Store materials properly to avoid damage'
+          ],
+          codeRef: 'BCP 2021 Section 2103.2'
+        },
+        {
+          number: 3,
+          title: 'Masonry Construction',
+          icon: <Hammer className="w-6 h-6" />,
+          details: [
+            'Start from corners and work towards center',
+            'Maintain proper bond pattern (English/Flemish bond)',
+            'Ensure uniform mortar joints (10-12mm thickness)',
+            'Check plumb, level, and alignment continuously',
+            'Provide proper toothing for future extensions',
+            'Install vertical reinforcement in seismic zones'
+          ],
+          codeRef: 'BCP 2021 Section 2105, ASCE 7-16 Chapter 12'
+        },
+        {
+          number: 4,
+          title: 'Seismic Reinforcement',
+          icon: <Shield className="w-6 h-6" />,
+          details: [
+            'Install horizontal reinforcement at every 4th course',
+            'Provide vertical reinforcement at corners and junctions',
+            'Use seismic bands at lintel and roof levels',
+            'Install corner reinforcement and T-junctions',
+            'Ensure proper anchorage of reinforcement'
+          ],
+          codeRef: 'BCP 2021 Section 2106, ASCE 7-16'
+        },
+        {
+          number: 5,
+          title: 'Openings & Lintels',
+          icon: <Building2 className="w-6 h-6" />,
+          details: [
+            'Mark door and window openings accurately',
+            'Install RCC lintels over openings (minimum 150mm bearing)',
+            'Provide proper support during lintel installation',
+            'Check lintel level and alignment',
+            'Continue masonry above lintels after 7 days'
+          ],
+          codeRef: 'BCP 2021 Section 2107'
+        },
+        {
+          number: 6,
+          title: 'Plastering & Finishing',
+          icon: <Wrench className="w-6 h-6" />,
+          details: [
+            'Apply cement plaster (1:4 or 1:6 mix)',
+            'Ensure proper surface preparation and curing',
+            'Check plaster thickness (minimum 12mm)',
+            'Apply finishing coat for smooth surface',
+            'Cure plaster for minimum 7 days'
+          ],
+          codeRef: 'BCP 2021 Section 2510'
+        }
+      ]
     },
     timber: {
       title: 'Timber Construction',
       image: '/timber.png',
-      description: 'Timber construction utilizes wood as the primary structural material, offering sustainability and natural aesthetics.'
+      description: 'Timber construction utilizes wood as the primary structural material, offering sustainability and natural aesthetics.',
+      steps: [
+        {
+          number: 1,
+          title: 'Material Selection & Treatment',
+          icon: <Settings className="w-6 h-6" />,
+          details: [
+            'Select treated timber (pressure-treated or chemical treatment)',
+            'Use structural grade timber (minimum Grade 1)',
+            'Check moisture content (maximum 19% for structural use)',
+            'Verify timber dimensions and quality',
+            'Store timber properly to prevent warping'
+          ],
+          codeRef: 'BCP 2021 Section 2302, ASCE 7-16'
+        },
+        {
+          number: 2,
+          title: 'Foundation & Base Preparation',
+          icon: <Anchor className="w-6 h-6" />,
+          details: [
+            'Construct concrete foundation or stone foundation',
+            'Install anchor bolts or foundation plates',
+            'Provide proper elevation above ground (minimum 150mm)',
+            'Install DPC to prevent moisture ingress',
+            'Check foundation level and alignment'
+          ],
+          codeRef: 'BCP 2021 Section 1805'
+        },
+        {
+          number: 3,
+          title: 'Frame Construction',
+          icon: <Building2 className="w-6 h-6" />,
+          details: [
+            'Erect main posts/columns with proper spacing',
+            'Install horizontal beams and joists',
+            'Use proper joints (mortise-tenon, metal connectors)',
+            'Check plumb, level, and square',
+            'Install diagonal bracing for stability',
+            'Secure all connections with appropriate fasteners'
+          ],
+          codeRef: 'BCP 2021 Section 2303, ASCE 7-16'
+        },
+        {
+          number: 4,
+          title: 'Seismic Reinforcement',
+          icon: <Shield className="w-6 h-6" />,
+          details: [
+            'Install metal connectors at joints',
+            'Provide diagonal bracing in both directions',
+            'Use hold-down anchors at base',
+            'Install shear walls or braced panels',
+            'Ensure proper load path to foundation'
+          ],
+          codeRef: 'BCP 2021 Section 2304, ASCE 7-16'
+        },
+        {
+          number: 5,
+          title: 'Roof Construction',
+          icon: <Layers className="w-6 h-6" />,
+          details: [
+            'Install roof trusses or rafters',
+            'Provide proper spacing and support',
+            'Install roof sheathing/planking',
+            'Apply weatherproofing membrane',
+            'Install roofing material (tiles, metal sheets)',
+            'Ensure proper ventilation and drainage'
+          ],
+          codeRef: 'BCP 2021 Section 2305'
+        },
+        {
+          number: 6,
+          title: 'Protection & Maintenance',
+          icon: <Shield className="w-6 h-6" />,
+          details: [
+            'Apply protective coatings (paint, varnish, preservatives)',
+            'Ensure proper ventilation to prevent rot',
+            'Regular inspection for termites and decay',
+            'Maintain proper drainage around structure',
+            'Follow maintenance schedule'
+          ],
+          codeRef: 'BCP 2021 Section 2306'
+        }
+      ]
     },
     stone: {
       title: 'Stone Masonry Construction',
       image: '/stone-masonry.png',
-      description: 'Stone masonry construction uses natural stone blocks bonded with mortar to create strong, durable structures.'
+      description: 'Stone masonry construction uses natural stone blocks bonded with mortar to create strong, durable structures.',
+      steps: [
+        {
+          number: 1,
+          title: 'Stone Selection & Preparation',
+          icon: <Settings className="w-6 h-6" />,
+          details: [
+            'Select good quality stones (hard, durable, free from cracks)',
+            'Sort stones by size and shape',
+            'Dress stones to required dimensions',
+            'Clean stones to remove dirt and loose particles',
+            'Soak stones in water before use'
+          ],
+          codeRef: 'BCP 2021 Section 2203'
+        },
+        {
+          number: 2,
+          title: 'Foundation Construction',
+          icon: <Anchor className="w-6 h-6" />,
+          details: [
+            'Excavate foundation trench (minimum 1.5m depth)',
+            'Prepare foundation bed and compact',
+            'Lay foundation stones in proper bond',
+            'Use larger stones at bottom, smaller at top',
+            'Fill gaps with smaller stones and mortar',
+            'Install DPC at plinth level'
+          ],
+          codeRef: 'BCP 2021 Section 1805, 2204'
+        },
+        {
+          number: 3,
+          title: 'Masonry Construction',
+          icon: <Hammer className="w-6 h-6" />,
+          details: [
+            'Start from corners with largest stones',
+            'Maintain proper bond pattern (coursed/rubble masonry)',
+            'Ensure stones are properly bedded in mortar',
+            'Check plumb, level, and alignment',
+            'Fill all joints completely with mortar',
+            'Avoid continuous vertical joints'
+          ],
+          codeRef: 'BCP 2021 Section 2205'
+        },
+        {
+          number: 4,
+          title: 'Seismic Reinforcement',
+          icon: <Shield className="w-6 h-6" />,
+          details: [
+            'Install horizontal reinforcement bands',
+            'Provide vertical reinforcement at corners',
+            'Use through stones (bond stones) at regular intervals',
+            'Install seismic bands at lintel and roof levels',
+            'Ensure proper anchorage of reinforcement'
+          ],
+          codeRef: 'BCP 2021 Section 2206, ASCE 7-16'
+        },
+        {
+          number: 5,
+          title: 'Openings & Lintels',
+          icon: <Building2 className="w-6 h-6" />,
+          details: [
+            'Mark door and window openings accurately',
+            'Install RCC or stone lintels over openings',
+            'Ensure minimum 150mm bearing on each side',
+            'Support lintels properly during installation',
+            'Continue masonry above lintels after setting'
+          ],
+          codeRef: 'BCP 2021 Section 2207'
+        },
+        {
+          number: 6,
+          title: 'Pointing & Finishing',
+          icon: <Wrench className="w-6 h-6" />,
+          details: [
+            'Rake out joints to proper depth (15-20mm)',
+            'Clean joints and wet before pointing',
+            'Apply cement mortar pointing (1:3 mix)',
+            'Finish joints properly (flush, recessed, or raised)',
+            'Cure pointing work for 7 days',
+            'Apply protective coating if required'
+          ],
+          codeRef: 'BCP 2021 Section 2208'
+        }
+      ]
     }
   };
 
   const constructionType = constructionTypes[type as keyof typeof constructionTypes];
 
   return (
-    <div className="space-y-6">
-      {/* Back Button */}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-blue-700 hover:text-blue-900 font-medium mb-4"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        <span>Back to Construction Types</span>
-      </button>
+    <div className="flex-1 w-full flex flex-col overflow-hidden min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0">
+        <div className="space-y-6">
+          {/* Back Button */}
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-blue-700 hover:text-blue-900 font-medium mb-4"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Construction Types</span>
+          </button>
 
       {/* Construction Type Header */}
-      <div className="bg-blue-700 rounded-lg overflow-hidden shadow-lg">
+      <div className="bg-gradient-to-r from-blue-700 to-blue-800 rounded-lg overflow-hidden shadow-lg">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 p-4 md:p-6">
           <div className="flex-1">
             <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{constructionType.title}</h3>
+            <p className="text-blue-100 text-sm md:text-base">{constructionType.description}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="bg-white/20 text-white text-xs px-3 py-1 rounded-full">BCP 2021</span>
+              <span className="bg-white/20 text-white text-xs px-3 py-1 rounded-full">ASCE 7-16</span>
+              <span className="bg-white/20 text-white text-xs px-3 py-1 rounded-full">Seismic Resistant</span>
+            </div>
           </div>
-          <div className="w-full md:w-80 h-48 md:h-64 rounded-lg overflow-hidden flex-shrink-0">
+          <div className="w-full md:w-80 h-48 md:h-64 rounded-lg overflow-hidden flex-shrink-0 shadow-xl">
             <img 
               src={constructionType.image} 
               alt={constructionType.title}
@@ -518,13 +859,69 @@ function ConstructionTypeDetailView({ type, onBack }: { type: string; onBack: ()
       </div>
 
       {/* Step-by-Step Construction Procedure */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-        <h4 className="text-lg md:text-xl font-bold text-gray-900 mb-4">Step-by-Step Construction Procedure</h4>
-        <div className="text-gray-600">
-         
-          <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            
+      <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-md">
+        <div className="flex items-center gap-3 mb-6">
+          <HardHat className="w-6 h-6 text-blue-700" />
+          <h4 className="text-lg md:text-xl font-bold text-gray-900">Step-by-Step Construction Procedure</h4>
+        </div>
+        
+        <div className="space-y-4">
+          {constructionType.steps.map((step, index) => (
+            <div
+              key={index}
+              className="border-l-4 border-blue-500 bg-blue-50 rounded-r-lg p-4 md:p-5 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                    {step.number}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="text-blue-700">
+                      {step.icon}
+                    </div>
+                    <h5 className="text-base md:text-lg font-bold text-gray-900">{step.title}</h5>
+                  </div>
+                  <ul className="space-y-2 mb-3">
+                    {step.details.map((detail, detailIndex) => (
+                      <li key={detailIndex} className="flex items-start gap-2 text-sm md:text-base text-gray-700">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <p className="text-xs md:text-sm text-blue-700 font-medium">
+                      <FileText className="w-3 h-3 md:w-4 md:h-4 inline mr-1" />
+                      Reference: {step.codeRef}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Important Notes */}
+        <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h5 className="font-bold text-yellow-900 mb-2">Important Safety & Quality Notes</h5>
+              <ul className="space-y-1 text-sm md:text-base text-yellow-800">
+                <li>• Always follow approved structural drawings and specifications</li>
+                <li>• Conduct regular quality checks and material testing</li>
+                <li>• Ensure proper curing of concrete and mortar (minimum 7-14 days)</li>
+                <li>• Maintain proper safety measures and use protective equipment</li>
+                <li>• Consult qualified structural engineers for design and supervision</li>
+                <li>• Comply with local building codes and regulations</li>
+              </ul>
+            </div>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
