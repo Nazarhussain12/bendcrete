@@ -259,7 +259,7 @@ function NewConstructionView({
   onBack 
 }: { 
   selectedConstructionType: string | null;
-  onConstructionTypeSelect: (type: string) => void;
+  onConstructionTypeSelect: (type: string | null) => void;
   onBack: () => void;
 }) {
   const [selectedPdf, setSelectedPdf] = useState<{ title: string; url: string } | null>(null);
