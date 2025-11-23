@@ -1010,47 +1010,8 @@ function WorkingConditionsView({
         <p className="text-base md:text-lg text-gray-800">{address || weather.location || 'Location'}</p>
       </div>
 
-      {/* Climate Data Section - Long-term Averages */}
-      {climate && (
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4 md:p-5 mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Thermometer className="w-5 h-5 md:w-6 md:h-6 text-green-700" />
-            <h4 className="text-base md:text-lg font-bold text-green-900">Climate Conditions (Long-term Averages 1991-2020)</h4>
-          </div>
-          <p className="text-xs md:text-sm text-green-700 mb-3 italic">These are historical climate averages, not today's weather</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
-            <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Avg Temperature</div>
-              <div className="text-xs md:text-sm font-semibold text-green-900">{climate.temperature2mMean.toFixed(1)}°C</div>
-            </div>
-            <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Max Temperature</div>
-              <div className="text-xs md:text-sm font-semibold text-green-900">{climate.temperature2mMax.toFixed(1)}°C</div>
-            </div>
-            <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Min Temperature</div>
-              <div className="text-xs md:text-sm font-semibold text-green-900">{climate.temperature2mMin.toFixed(1)}°C</div>
-            </div>
-            <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Precipitation</div>
-              <div className="text-xs md:text-sm font-semibold text-green-900">{climate.precipitationSum.toFixed(1)} mm/day</div>
-            </div>
-            <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Wind Speed</div>
-              <div className="text-xs md:text-sm font-semibold text-green-900">{climate.windspeed10mMean.toFixed(1)} km/h</div>
-            </div>
-            <div className="bg-white/70 rounded-lg p-2.5 md:p-3 shadow-sm">
-              <div className="text-[10px] md:text-xs text-gray-800 mb-1">Climate Zone</div>
-              <div className="text-xs md:text-sm font-semibold text-green-900">{climate.climateZone || 'N/A'}</div>
-            </div>
-          </div>
-        </div>
-      )}
-      {loadingClimate && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4 text-center">
-          <p className="text-sm text-green-700">Loading climate data...</p>
-        </div>
-      )}
+      
+     
 
       {/* Current Weather Card - Today's Conditions */}
       <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-lg p-4 md:p-5 mb-4">
