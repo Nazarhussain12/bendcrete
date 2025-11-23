@@ -186,7 +186,7 @@ export default function AssessmentModal({
 
         {/* Content */}
         <div className={`flex-1 flex flex-col ${
-          currentView === 'newConstruction' ? 'overflow-hidden' : 'overflow-y-auto p-4 md:p-6'
+          currentView === 'newConstruction' ? 'overflow-hidden md:overflow-hidden' : 'overflow-y-auto p-4 md:p-6'
         }`}>
           {currentView === 'newConstruction' ? (
             <NewConstructionView 
@@ -315,13 +315,18 @@ function NewConstructionView({
           <h3 className="text-lg md:text-xl font-bold text-gray-900">{selectedPdf.title}</h3>
         </div>
 
-        {/* PDF Viewer - Takes full remaining height */}
-        <div className="flex-1 overflow-hidden bg-gray-100 min-h-0">
+        {/* PDF Viewer - Takes full remaining height, scrollable on mobile */}
+        <div className="flex-1 bg-gray-100 min-h-0 overflow-auto md:overflow-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
           <iframe
             src={`${selectedPdf.url}#toolbar=1&navpanes=1&scrollbar=1`}
             className="w-full h-full"
+            style={{ 
+              border: 'none',
+              minHeight: '600px'
+            }}
             title={selectedPdf.title}
-            style={{ border: 'none' }}
+            scrolling="yes"
+            allow="fullscreen"
           />
         </div>
         
