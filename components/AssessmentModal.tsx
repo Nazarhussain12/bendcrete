@@ -186,7 +186,7 @@ export default function AssessmentModal({
 
         {/* Content */}
         <div className={`flex-1 flex flex-col ${
-          currentView === 'newConstruction' ? 'overflow-hidden md:overflow-hidden' : 'overflow-y-auto p-4 md:p-6'
+          currentView === 'newConstruction' ? 'overflow-hidden' : 'overflow-y-auto p-4 md:p-6'
         }`}>
           {currentView === 'newConstruction' ? (
             <NewConstructionView 
@@ -291,7 +291,7 @@ function NewConstructionView({
   // If a PDF is selected, show PDF viewer
   if (selectedPdf) {
     return (
-      <div className="h-full w-full flex flex-col">
+      <div className="flex-1 w-full flex flex-col overflow-hidden min-h-0">
         {/* PDF Viewer Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 md:p-6 pb-3 flex-shrink-0 bg-white border-b border-gray-200">
           <button
@@ -339,118 +339,122 @@ function NewConstructionView({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-3">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-blue-700 hover:text-blue-900 font-medium"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
-          </button>
-        </div>
-        <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-          Built in Compliance With Current Building Regulations
-        </h3>
-        <p className="text-base text-gray-600">
-          The step-by-step construction follow the National and international building codes.
-        </p>
-      </div>
+    <div className="flex-1 w-full flex flex-col overflow-hidden min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0">
+        <div className="space-y-6">
+          {/* Header Section */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-blue-700 hover:text-blue-900 font-medium"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>Back</span>
+              </button>
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+              Built in Compliance With Current Building Regulations
+            </h3>
+            <p className="text-base text-gray-600">
+              The step-by-step construction follow the National and international building codes.
+            </p>
+          </div>
 
-      {/* Building Codes References */}
-      <div className="mb-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">Building Codes References</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {buildingCodes.map((code, index) => (
-            <div
-              key={index}
-              onClick={() => setSelectedPdf({ title: code.title, url: code.url })}
-              className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02]"
-            >
-              <div className="aspect-[3/4] rounded-lg mb-4 overflow-hidden">
-                <img 
-                  src={code.image} 
-                  alt={code.title}
-                  className="w-full h-full object-cover"
-                />
+          {/* Building Codes References */}
+          <div className="mb-6">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Building Codes References</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {buildingCodes.map((code, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedPdf({ title: code.title, url: code.url })}
+                  className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02]"
+                >
+                  <div className="aspect-[3/4] rounded-lg mb-4 overflow-hidden">
+                    <img 
+                      src={code.image} 
+                      alt={code.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800 text-center">{code.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Construction Types */}
+          <div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Construction Types</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* RCC Construction */}
+              <div 
+                onClick={() => onConstructionTypeSelect('rcc')}
+                className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
+              >
+                <div className="relative h-40 md:h-56 overflow-hidden">
+                  <img 
+                    src="/RCC.png" 
+                    alt="RCC Construction"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4 bg-blue-700 text-white">
+                  <h5 className="text-base font-bold">RCC Construction</h5>
+                </div>
               </div>
-              <p className="text-sm font-semibold text-gray-800 text-center">{code.title}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Construction Types */}
-      <div>
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">Construction Types</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* RCC Construction */}
-          <div 
-            onClick={() => onConstructionTypeSelect('rcc')}
-            className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
-          >
-            <div className="relative h-40 md:h-56 overflow-hidden">
-              <img 
-                src="/RCC.png" 
-                alt="RCC Construction"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4 bg-blue-700 text-white">
-              <h5 className="text-base font-bold">RCC Construction</h5>
-            </div>
-          </div>
+              {/* Brick Masonry Construction */}
+              <div 
+                onClick={() => onConstructionTypeSelect('brick')}
+                className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
+              >
+                <div className="relative h-40 md:h-56 overflow-hidden">
+                  <img 
+                    src="/Brick-masonry.png" 
+                    alt="Brick Masonry Construction"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4 bg-blue-700 text-white">
+                  <h5 className="text-base font-bold">Brick Masonry Const.</h5>
+                </div>
+              </div>
 
-          {/* Brick Masonry Construction */}
-          <div 
-            onClick={() => onConstructionTypeSelect('brick')}
-            className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
-          >
-            <div className="relative h-40 md:h-56 overflow-hidden">
-              <img 
-                src="/Brick-masonry.png" 
-                alt="Brick Masonry Construction"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4 bg-blue-700 text-white">
-              <h5 className="text-base font-bold">Brick Masonry Const.</h5>
-            </div>
-          </div>
+              {/* Timber Construction */}
+              <div 
+                onClick={() => onConstructionTypeSelect('timber')}
+                className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
+              >
+                <div className="relative h-40 md:h-56 overflow-hidden">
+                  <img 
+                    src="/timber.png" 
+                    alt="Timber Construction"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4 bg-blue-700 text-white">
+                  <h5 className="text-base font-bold">Timber Construction</h5>
+                </div>
+              </div>
 
-          {/* Timber Construction */}
-          <div 
-            onClick={() => onConstructionTypeSelect('timber')}
-            className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
-          >
-            <div className="relative h-40 md:h-56 overflow-hidden">
-              <img 
-                src="/timber.png" 
-                alt="Timber Construction"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4 bg-blue-700 text-white">
-              <h5 className="text-base font-bold">Timber Construction</h5>
-            </div>
-          </div>
-
-          {/* Stone Masonry Construction */}
-          <div 
-            onClick={() => onConstructionTypeSelect('stone')}
-            className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
-          >
-            <div className="relative h-40 md:h-56 overflow-hidden">
-              <img 
-                src="/stone-masonry.png" 
-                alt="Stone Masonry Construction"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4 bg-blue-700 text-white">
-              <h5 className="text-base font-bold">Stone Masonry Const.</h5>
+              {/* Stone Masonry Construction */}
+              <div 
+                onClick={() => onConstructionTypeSelect('stone')}
+                className="bg-blue-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.02]"
+              >
+                <div className="relative h-40 md:h-56 overflow-hidden">
+                  <img 
+                    src="/stone-masonry.png" 
+                    alt="Stone Masonry Construction"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4 bg-blue-700 text-white">
+                  <h5 className="text-base font-bold">Stone Masonry Const.</h5>
+                </div>
+              </div>
             </div>
           </div>
         </div>
